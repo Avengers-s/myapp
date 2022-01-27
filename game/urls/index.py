@@ -1,6 +1,5 @@
 from django.urls import path,include
-from game.views.index import index,play
+from game.views.index import index
 urlpatterns = [
     path('',index, name="index"),
-    path('play/', play, name="play"),
 ]

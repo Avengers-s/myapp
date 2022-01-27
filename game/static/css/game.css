@@ -1,0 +1,33 @@
+.my_game_menu{
+    background-image: url("/static/image/menu/background.jpg");
+    width: 100%;
+    height: 100%;
+    background-size: 100% 100%;
+    user-select: none;
+}
+
+.my_game_menu_field{
+    width:20vw;
+    position:relative;
+    top:40%;
+    left:20%;
+}
+
+.my_game_menu_field_item{
+    height:6vh;
+    width:18vw;
+    color:white;
+    font-size:4vh;
+    font-style:italic;
+    text-align:center;
+    background-color:rgba(39,21,28,0.6);
+    border-radius:10px;
+    letter-spacing:0.5vw;
+    cursor:pointer;
+
+}
+.my_game_menu_field_item:hover{
+    transform:scale(1.2);
+    transition:100ms;
+}
+
