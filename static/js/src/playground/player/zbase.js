@@ -34,11 +34,13 @@ class Player extends MyGameObject{
         });
         if(this.is_me){
             this.playground.game_map.$canvas.mousedown(function(e){
+                let rect=outer.ctx.canvas.getBoundingClientRect();
                 if(e.which === 3){
-                    outer.move_to(e.clientX,e.clientY);
+                    outer.move_to(e.clientX - rect.left,e.clientY - rect.top);
+                    outer.click_effect(e.clientX - rect.left,e.clientY - rect.top);
                 }else if(e.which === 1){
                     if(outer.cur_skill === "fireball"){
-                        outer.shoot_fireball(e.clientX,e.clientY);
+                        outer.shoot_fireball(e.clientX - rect.left,e.clientY - rect.top);
                         outer.cur_skill = null;
                     }
                 }
@@ -48,6 +50,20 @@ class Player extends MyGameObject{
                     outer.cur_skill = "fireball";
                 }
             });
+        }
+    }
+
+    click_effect(tx, ty){
+        for(let i=0;i<20+Math.random()*10;i++){
+            let x=tx,y=ty;
+            let radius = this.playground.height *0.05 * 0.05 * Math.random();
+            let angle = Math.PI * 2 * Math.random();
+            let vx = Math.cos(angle);
+            let vy = Math.sin(angle);
+            let color = "white";
+            let speed = this.playground.height * 0.3;
+            let move_length = this.playground.height *0.04 *Math.random();
+            new Particle(this.playground,this, x, y, vx, vy, radius, color, speed, move_length);
         }
     }
 
@@ -62,12 +78,12 @@ class Player extends MyGameObject{
     is_attack(angle,damage){
         for(let i=0;i<20+Math.random()*10;i++){
             let x=this.x,y=this.y;
-            let radius = this.radius*Math.random()*0.08;
+            let radius = this.radius*Math.random()*0.06;
             let angle = Math.PI * 2* Math.random();
             let vx=Math.cos(angle),vy=Math.sin(angle);
             let color = this.color;
-            let speed = this.speed * 8;
-            let move_length = this.radius * Math.random() * 4;
+            let speed = this.speed * 3;
+            let move_length = this.radius * Math.random() * 3;
             new Particle(this.playground, this, x, y, vx, vy, radius, color, speed ,move_length);
         }
         this.radius -= damage;
