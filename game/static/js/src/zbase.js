@@ -1,7 +1,9 @@
 export class MyGame{
-    constructor(id){
+    constructor(id,AcwingOS){
         this.id=id;
-        this.$my_game = $('#'+this.id)
+        this.AcwingOS=AcwingOS;
+        this.$my_game = $('#'+this.id);
+        this.settings =new Settings(this);
         this.menu = new MyGameMenu(this);
         this.playground = new MyGamePlayground(this);
         this.start();

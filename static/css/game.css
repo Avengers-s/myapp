@@ -5,7 +5,115 @@
     background-size: 100% 100%;
     user-select: none;
 }
+.my_game_settings{
+    background-image: url("/static/image/menu/background.jpg");
+    width: 100%;
+    height: 100%;
+    background-size: 100% 100%;
+    user-select: none;
+}
+.my_game_settings_login{
+    width: 20vw;
+    height: 41vh;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: rgba(0,0,0,0.7);
+    border-radius: 5px;
+}
+.my_game_settings_username{
+    display:block;
+    height:7vh;
+}
+.my_game_settings_item{
+    width:100%;
+    height:100%;
+}
+.my_game_settings_acwing{
+    display:block;
+    height:7vh;
+}
+.my_game_settings_acwing > img{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    cursor: pointer;
+    display: block;
+}
+.my_game_settings_acwing > div{
+    font-size:1.5vh;
+    color:white;
+    text-align:center;
+    display: block;
+}
 
+.my_game_settings_password{
+    display:block;
+    height:7vh;
+}
+.my_game_settings_submit{
+    display:block;
+    height:7vh;
+}
+
+.my_game_settings_error_message{
+    color: red;
+    font-size: 0.8vh;
+    display: inline;
+    float: left;
+    padding-left: 1vw;
+
+}
+.my_game_settings_option{
+    color: white;
+    cursor: pointer;
+    font-size: 2vh;
+    display: inline;
+    float: right;
+    padding-right: 1vw;
+}
+.my_game_settings_item >button{
+    color: white;
+    width: 90%;
+    line-height: 3vh;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: #4CAF50;
+    border-radius: 5px;
+
+
+}
+.my_game_settings_item > input{
+    width:90%;
+    line-height: 3vh;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.my_game_settings_title{
+    text-align: center;
+    color: white;
+    font-size:3vh;
+    height:4vh;
+    padding-top:2vh;
+    margin-bottom:2vh;
+
+}
+.my_game_settings_register{
+    width: 20vw;
+    height: 49vh;
+    border-radius: 5px;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: rgba(0,0,0,0.7);
+}
 .my_game_menu_field{
     width:20vw;
     position:relative;
