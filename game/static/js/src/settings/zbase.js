@@ -98,6 +98,7 @@ class Settings {
         this.$register_acwing = this.$register.find(".my_game_settings_acwing img");
         this.$register_error_message = this.$register.find(".my_game_settings_error_message");
         this.$register_login = this.$register.find(".my_game_settings_option");
+        this.$acwing_login = this.$settings.find(".my_game_settings_acwing img");
         this.$register.hide();
         this.start();
     }
@@ -124,8 +125,23 @@ class Settings {
         this.$register_submit.click(function(){
             outer.register_on_remote();
         });
+        this.$acwing_login.click(function(){
+            outer.acwing_login();
+        });
     }
-
+    
+    acwing_login(){
+        
+        $.ajax({
+            url: "https://app1281.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            type: "GET",
+            success: function(resp){
+                if(resp.result==="success"){
+                    window.location.replace(resp.apply_code_url);
+                }
+            },
+        });
+    }
     logout_on_remote(){
         $.ajax({
             url: "https://app1281.acapp.acwing.com.cn/settings/logout",
