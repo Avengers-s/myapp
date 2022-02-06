@@ -630,23 +630,29 @@ class Settings {
     getinfo_acapp(){
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/getinfo/",
+            url: "https://app1281.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
             type: "GET",
-            data: {
-                platform: outer.platform,
-            },
             success:function(resp){
                 if(resp.result === "success"){
                     console.log(resp);
-                    outer.username = resp.username;
-                    outer.photo = resp.photo,
-                    outer.hide();
-                    outer.root.menu.show();
-                }else{
-                    outer.login();
+                    outer.acapp_login(resp.appid,resp.redirect_uri,resp.scope,resp.state);
                 }
             },
         });
+    }
+    acapp_login(appid,redirect_uri,scope,state){
+        let outer = this;
+        this.root.AcwingOS.api.oauth2.authorize(appid, redirect_uri, scope, state,function(resp){
+            if(resp.result === "success"){
+                outer.username = resp.username;
+                outer.photo = resp.photo;
+                outer.hide();
+                outer.root.menu.show();
+            }else{
+                console.log(resp);
+            }
+        });
+    
     }
     getinfo_web(){
         let outer = this;
