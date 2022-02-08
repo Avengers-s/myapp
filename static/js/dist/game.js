@@ -102,7 +102,12 @@ class Game_Map extends MyGameObject{
         this.playground.$playground.append(this.$canvas);
    
     }
-
+    resize(){
+        this.ctx.canvas.width = this.playground.width;
+        this.ctx.canvas.height = this.playground.height;
+        this.ctx.fillStyle="rgba(0,0,0,1)";
+        this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
+    }
     update(){
         this.render();
     }
@@ -125,7 +130,7 @@ class Particle extends MyGameObject{
         this.radius=radius;
         this.color=color;
         this.speed=speed;
-        this.eps=0.1;
+        this.eps=0.01;
         this.ctx = this.playground.game_map.ctx;
         this.friction =0.9;
         this.move_length = move_length;
@@ -134,7 +139,7 @@ class Particle extends MyGameObject{
         
     }
     update(){
-        if(this.speed < 20 || this.move_length < this.eps){
+        if(this.speed < this.eps || this.move_length < this.eps){
             this.destroy();
             return false;
         }
@@ -147,7 +152,7 @@ class Particle extends MyGameObject{
     }
     render(){
         this.ctx.beginPath();
-        this.ctx.arc(this.x,this.y,this.radius,0,Math.PI *2,false);
+        this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
         this.ctx.fillStyle=this.color;
         this.ctx.fill();
     }
@@ -164,7 +169,7 @@ class Player extends MyGameObject{
         this.vy=0;
         this.move_length=0;
         this.speed=speed;
-        this.eps=0.1;
+        this.eps=0.01;
         this.is_me=is_me;
         this.color = color;
         this.cur_skill = null;
@@ -182,7 +187,7 @@ class Player extends MyGameObject{
     start(){
         this.add_listening_events();
         if(!this.is_me){
-            this.move_to(this.playground.width*Math.random(),this.playground.height*Math.random());
+            this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
         }
     }
 
@@ -195,11 +200,11 @@ class Player extends MyGameObject{
             this.playground.game_map.$canvas.mousedown(function(e){
                 let rect=outer.ctx.canvas.getBoundingClientRect();
                 if(e.which === 3){
-                    outer.move_to(e.clientX - rect.left,e.clientY - rect.top);
-                    outer.click_effect(e.clientX - rect.left,e.clientY - rect.top);
+                    outer.move_to((e.clientX - rect.left)/outer.playground.scale,(e.clientY - rect.top)/outer.playground.scale);
+                    outer.click_effect((e.clientX - rect.left)/outer.playground.scale,(e.clientY - rect.top)/outer.playground.scale);
                 }else if(e.which === 1){
                     if(outer.cur_skill === "fireball"){
-                        outer.shoot_fireball(e.clientX - rect.left,e.clientY - rect.top);
+                        outer.shoot_fireball((e.clientX - rect.left)/outer.playground.scale,(e.clientY - rect.top)/outer.playground.scale);
                         outer.cur_skill = null;
                     }
                 }
@@ -222,7 +227,7 @@ class Player extends MyGameObject{
             let color = "white";
             let speed = this.playground.height * 0.3;
             let move_length = this.playground.height *0.04 *Math.random();
-            new Particle(this.playground,this, x, y, vx, vy, radius, color, speed, move_length);
+            new Particle(this.playground,this, x, y, vx, vy, radius/this.playground.scale, color, speed/this.playground.scale, move_length/this.playground.scale);
         }
     }
 
@@ -230,7 +235,7 @@ class Player extends MyGameObject{
         let angle = Math.atan2(ty-this.y, tx-this.x);
         let vx=Math.cos(angle);
         let vy=Math.sin(angle);
-        new FireBall(this.playground, this, this.x, this.y, this.playground.height*0.01,vx,vy,this.playground.height*0.5,this.playground.height,"orange",this.playground.height*0.01);
+        new FireBall(this.playground, this, this.x, this.y, this.playground.height*0.01/this.playground.scale,vx,vy,this.playground.height*0.5/this.playground.scale,this.playground.height/this.playground.scale,"orange",this.playground.height*0.01/this.playground.scale);
     }
 
 
@@ -246,7 +251,7 @@ class Player extends MyGameObject{
             new Particle(this.playground, this, x, y, vx, vy, radius, color, speed ,move_length);
         }
         this.radius -= damage;
-        if(this.radius < 10){
+        if(this.radius < this.eps){
             this.destroy();
             return false;
         }
@@ -275,7 +280,11 @@ class Player extends MyGameObject{
             let ty = player.y+player.vy*player.speed*0.2;
             this.shoot_fireball(tx,ty);
         }
-        if(this.damage_speed > 50){
+        this.update_move();
+        this.render();
+    }
+    update_move(){
+        if(this.damage_speed > this.eps*20 ){
             this.vx=this.vy=0;
             this.move_length=0;
             this.x+=this.damage_vx*this.damage_speed*this.timedelta/1000;
@@ -292,26 +301,25 @@ class Player extends MyGameObject{
                     this.vx=this.vy=0;
                     this.move_length=0;
                 }else{
-                    this.move_to(this.playground.width*Math.random(),this.playground.height*Math.random());
+                    this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
                 }
             }
         }
-        this.render();
-    }
 
+    }
     render(){
         if(this.is_me){
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.arc(this.x*this.playground.scale, this.y*this.playground.scale, this.radius*this.playground.scale, 0, Math.PI * 2, false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+            this.ctx.drawImage(this.img, (this.x - this.radius)*this.playground.scale, (this.y - this.radius)*this.playground.scale, this.radius * 2*this.playground.scale, this.radius * 2*this.playground.scale); 
             this.ctx.restore();
         }
         else{
             this.ctx.beginPath();
-            this.ctx.arc(this.x,this.y,this.radius,0,Math.PI *2,false);
+            this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
             this.ctx.fillStyle=this.color;
             this.ctx.fill();
         }
@@ -376,7 +384,7 @@ class FireBall extends MyGameObject{
 
     render(){
         this.ctx.beginPath();
-        this.ctx.arc(this.x,this.y,this.radius,0,Math.PI *2,false);
+        this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
         this.ctx.fillStyle=this.color;
         this.ctx.fill();
     }
@@ -393,18 +401,31 @@ class MyGamePlayground{
             return colors[Math.floor(Math.random()*colors.length)];
     }
     start(){
-
+        let outer = this;
+        $(window).resize(function(){
+            outer.resize();
+        });
+    }
+    resize(){
+        this.width = this.$playground.width();
+        this.height = this.$playground.height();
+        let unit = Math.min(this.width/16,this.height/9);
+        this.width = unit*16;
+        this.height = unit*9;
+        this.scale = this.height;
+        if(this.game_map)this.game_map.resize();
     }
     show(){
         this.$playground.show();
         this.root.$my_game.append(this.$playground);
         this.width = this.$playground.width();
         this.height = this.$playground.height();
+        this.resize();
         this.game_map = new Game_Map(this);
         this.players = [];
-        this.players.push(new Player(this,this.width/2,this.height/2,this.height*0.05,"white",this.height*0.25,true));
+        this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,true));
         for(let i=0;i<5;i++){
-            this.players.push(new Player(this,this.width/2,this.height/2,this.height*0.05,this.get_random_color(),this.height*0.25,false));
+            this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,false));
         }
     }
     hide(){
