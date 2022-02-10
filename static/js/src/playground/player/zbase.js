@@ -1,5 +1,5 @@
 class Player extends MyGameObject{
-    constructor(playground,x,y,radius,color,speed,is_me){
+    constructor(playground,x,y,radius,color,speed,character,username,photo){
         super();
         this.playground = playground;
         this.ctx = this.playground.game_map.ctx;
@@ -11,7 +11,9 @@ class Player extends MyGameObject{
         this.move_length=0;
         this.speed=speed;
         this.eps=0.01;
-        this.is_me=is_me;
+        this.character = character;
+        this.username = username;
+        this.photo = photo;
         this.color = color;
         this.cur_skill = null;
         this.friction = 0.9;
@@ -19,15 +21,15 @@ class Player extends MyGameObject{
         this.damage_vy=0;
         this.damage_speed=0;
         this.spent_time=0;
-        if(this.is_me){
+        if(this.character !== "robot"){
             this.img = new Image();
-            this.img.src = this.playground.root.settings.photo;
+            this.img.src = this.photo;
         }
 
     }
     start(){
         this.add_listening_events();
-        if(!this.is_me){
+        if(this.character === "robot"){
             this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
         }
     }
@@ -37,7 +39,7 @@ class Player extends MyGameObject{
         this.playground.game_map.$canvas.on("contextmenu",function(){
             return false;
         });
-        if(this.is_me){
+        if(this.character === "me"){
             this.playground.game_map.$canvas.mousedown(function(e){
                 let rect=outer.ctx.canvas.getBoundingClientRect();
                 if(e.which === 3){
@@ -115,7 +117,7 @@ class Player extends MyGameObject{
     }
     update(){
         this.spent_time+=this.timedelta/1000;
-        if(!this.is_me && this.spent_time>4 && Math.random() < 1.0/300){
+        if(this.character === "robot" && this.spent_time>4 && Math.random() < 1.0/300){
             let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];
             let tx = player.x+player.vx*player.speed*0.2;
             let ty = player.y+player.vy*player.speed*0.2;
@@ -138,7 +140,7 @@ class Player extends MyGameObject{
                 this.y+=this.vy*moved;
                 this.move_length-=moved;
             }else{
-                if(this.is_me){
+                if(this.character !== "robot"){
                     this.vx=this.vy=0;
                     this.move_length=0;
                 }else{
@@ -149,7 +151,7 @@ class Player extends MyGameObject{
 
     }
     render(){
-        if(this.is_me){
+        if(this.character !== "robot"){
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(this.x*this.playground.scale, this.y*this.playground.scale, this.radius*this.playground.scale, 0, Math.PI * 2, false);

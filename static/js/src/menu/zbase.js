@@ -32,9 +32,11 @@ class MyGameMenu{
         let outer = this;
         this.$single_mod.click(function(){
             outer.hide();
-            outer.root.playground.show();
+            outer.root.playground.show("single mode");
         });
         this.$multi_mod.click(function(){
+            outer.hide();
+            outer.root.playground.show("multi mode");
         });
         this.$settings_mod.click(function(){
             outer.root.settings.logout_on_remote();
