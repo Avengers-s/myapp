@@ -33,17 +33,29 @@ class FireBall extends MyGameObject{
     }
 
     update(){
+        if(this.player.character !== "enemy"){
+            this.update_attack();
+        }
+        this.update_move();
+        this.render();
+    }
+    update_attack(){
         for(let i=0;i<this.playground.players.length;i++){
             let player = this.playground.players[i];
             if(player != this.player){
                 if(this.is_collision(player)){
                     let angle = Math.atan2(player.y-this.y,player.x-this.x);
                     player.is_attack(angle,this.damage);
+                    if(this.playground.mode === "multi mode"){
+                        this.playground.mps.send_attack(player.uuid,player.x,player.y,angle,this.damage,this.uuid);
+                    }
                     this.destroy();
                     return false;
                 }
             }
         }
+    }
+    update_move(){
         if(this.move_length<this.eps){
             this.destroy();
             return false;
@@ -52,9 +64,17 @@ class FireBall extends MyGameObject{
         this.x+=moved*this.vx;
         this.y+=moved*this.vy;
         this.move_length-=moved;
-        this.render();
     }
-
+    on_destroy(){
+        let fireballs = this.player.fireballs;
+        for(let i=0;i<fireballs.length;i++){
+            let fireball = fireballs[i];
+            if(fireball.uuid === this.uuid){
+                fireballs.splice(i,1);
+                break;
+            }
+        }
+    }
     render(){
         this.ctx.beginPath();
         this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);

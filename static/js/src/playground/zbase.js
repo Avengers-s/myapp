@@ -3,6 +3,7 @@ class MyGamePlayground{
         this.root = root;
         this.$playground = $(`<div class="my_game_playground"></div>`);
         this.hide();
+        this.player_count=0;
         this.start();
     }
     get_random_color(){
@@ -30,8 +31,11 @@ class MyGamePlayground{
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.game_map = new Game_Map(this);
+        this.notice_board = new NoticeBoard(this);
+        this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
         this.players = [];
+        this.mode=mode;
         this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
         if(mode === "single mode"){
             for(let i=0;i<5;i++){

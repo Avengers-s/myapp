@@ -143,6 +143,10 @@ class Settings {
         });
     }
     logout_on_remote(){
+        if(this.root.AcwingOS){
+            this.root.AcwingOS.api.window.close();
+            return false;
+        }
         $.ajax({
             url: "https://app1281.acapp.acwing.com.cn/settings/logout",
             type: "GET",
