@@ -58,7 +58,7 @@ class Player extends MyGameObject{
         if(this.character === "me"){
             this.playground.game_map.$canvas.mousedown(function(e){
                 if(outer.playground.state!=="fighting"){
-                    return false;
+                    return true;
                 }
                 let rect=outer.ctx.canvas.getBoundingClientRect();
                 if(e.which === 3){
@@ -88,7 +88,19 @@ class Player extends MyGameObject{
                     }
                 }
             });
-            $(window).keydown(function(e){
+            this.playground.game_map.$canvas.keydown(function(e){
+                if(e.which === 13){
+                    if(outer.playground.mode === "multi mode"){
+                        outer.playground.chat_field.show_input();
+                    }
+                    return false;
+                }else if(e.which === 27){
+                    if(outer.playground.mode === "multi mode"){
+                        outer.playground.chat_field.hide_input();
+                    }
+                    return false;
+                }
+
                 if(outer.playground.state!=="fighting"){
                     return true;
                 }
@@ -140,7 +152,10 @@ class Player extends MyGameObject{
     }
 
     on_destroy(){
-        if(this.character === "me")this.playground.state = "over";
+        if(this.character === "me" && this.playground.state === "fighting")
+        {
+            this.playground.state = "over";
+        }
         for(let i=0;i<this.playground.players.length;i++){
             if(this.playground.players[i]==this){
                 this.playground.players.splice(i,1);
