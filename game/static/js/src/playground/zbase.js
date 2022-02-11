@@ -4,6 +4,7 @@ class MyGamePlayground{
         this.$playground = $(`<div class="my_game_playground"></div>`);
         this.hide();
         this.player_count=0;
+        this.chat_state = 0;
         this.start();
     }
     get_random_color(){

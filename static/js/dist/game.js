@@ -120,11 +120,13 @@ class ChatField {
     add_listening_events(){
         let outer = this;
         this.$input.keydown(function(e){
-            if(e.which === 27){
-                outer.hide_input();
-                return false;
-            }else if(e.which === 13){
+            if(e.which === 13){
                 let text = outer.$input.val();
+                if(!text){
+                    outer.playground.chat_state =0;
+                    outer.hide_input();
+                    return false;
+                }
                 let username = outer.playground.root.settings.username;
                 if(text){
                     outer.$input.val("");
@@ -352,12 +354,13 @@ class Player extends MyGameObject{
             this.playground.game_map.$canvas.keydown(function(e){
                 if(e.which === 13){
                     if(outer.playground.mode === "multi mode"){
-                        outer.playground.chat_field.show_input();
-                    }
-                    return false;
-                }else if(e.which === 27){
-                    if(outer.playground.mode === "multi mode"){
-                        outer.playground.chat_field.hide_input();
+                        if(outer.playground.chat_state===0){
+                            outer.playground.chat_field.show_input();
+                            outer.playground.chat_state =1;
+                        }else{
+                            outer.playground.chat_state=0;
+                            outer.playground.chat_field.hide_input();
+                        }
                     }
                     return false;
                 }
@@ -817,6 +820,7 @@ class MyGamePlayground{
         this.$playground = $(`<div class="my_game_playground"></div>`);
         this.hide();
         this.player_count=0;
+        this.chat_state = 0;
         this.start();
     }
     get_random_color(){

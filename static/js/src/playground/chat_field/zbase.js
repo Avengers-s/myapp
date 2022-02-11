@@ -16,11 +16,13 @@ class ChatField {
     add_listening_events(){
         let outer = this;
         this.$input.keydown(function(e){
-            if(e.which === 27){
-                outer.hide_input();
-                return false;
-            }else if(e.which === 13){
+            if(e.which === 13){
                 let text = outer.$input.val();
+                if(!text){
+                    outer.playground.chat_state =0;
+                    outer.hide_input();
+                    return false;
+                }
                 let username = outer.playground.root.settings.username;
                 if(text){
                     outer.$input.val("");
