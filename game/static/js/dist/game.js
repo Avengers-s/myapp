@@ -60,6 +60,11 @@ class MyGameObject{
     start(){
 
     }
+
+    last_update(){
+
+    }
+
     create_uuid(){
         let res="";
         for(let i=0;i<8;i++){
@@ -68,11 +73,15 @@ class MyGameObject{
         }
         return res;
     }
+
     update(){
 
     }
+
     on_destroy(){
+    
     }
+
     destroy(){
         this.on_destroy();
         for(let i=0; i<my_game_objects.length; i++){
@@ -96,6 +105,10 @@ let MY_GAME_ANIMATION=function(stamp){
             obj.timedelta=stamp-last_stamp;
             obj.update();
         }
+    }
+    for(let i=0;i<my_game_objects.length;i++){
+        let obj = my_game_objects[i];
+        obj.last_update();
     }
     last_stamp = stamp;
     requestAnimationFrame(MY_GAME_ANIMATION);
@@ -335,7 +348,7 @@ class Player extends MyGameObject{
                     let tx=(e.clientX - rect.left)/outer.playground.scale,ty=(e.clientY - rect.top)/outer.playground.scale;
                     if(outer.cur_skill === "fireball"){
                         let fireball=outer.shoot_fireball(tx,ty);
-                        outer.fireball_coldtime=2;
+                        outer.fireball_coldtime= 0.01;
                         outer.cur_skill = null;
                         if(outer.playground.mode === "multi mode"){
                             outer.playground.mps.send_shoot_fireball(tx,ty,fireball.uuid);
@@ -419,6 +432,7 @@ class Player extends MyGameObject{
         if(this.character === "me" && this.playground.state === "fighting")
         {
             this.playground.state = "over";
+            this.playground.score_board.lose();
         }
         for(let i=0;i<this.playground.players.length;i++){
             if(this.playground.players[i]==this){
@@ -482,11 +496,19 @@ class Player extends MyGameObject{
             let ty = player.y+player.vy*player.speed*0.2;
             this.shoot_fireball(tx,ty);
         }
+        this.update_win();
         this.update_move();
         if(this.character === "me" && this.playground.state === "fighting"){
             this.update_skill_coldtime();
         }
         this.render();
+    }
+
+    update_win(){
+        if(this.playground.state === "fighting" && this.character === "me" && this.playground.players.length === 1){
+            this.playground.state = "over";
+            this.playground.score_board.win();
+        }
     }
 
     update_skill_coldtime(){
@@ -580,6 +602,64 @@ class Player extends MyGameObject{
         }
 
 
+    }
+
+}
+class ScoreBoard extends MyGameObject{
+    constructor(playground){
+        super();
+        this.playground = playground;
+        this.ctx = this.playground.game_map.ctx;
+        this.win_img = new Image();
+        this.lose_img = new Image();
+        this.win_img.src = "https://cdn.acwing.com/media/article/image/2021/12/17/1_8f58341a5e-win.png";
+        this.lose_img.src = "https://cdn.acwing.com/media/article/image/2021/12/17/1_9254b5f95e-lose.png";
+        this.state = "null";
+    }
+
+    start(){
+        
+    }
+
+    add_listening_events(){
+        let outer = this;
+        let $canvas = this.playground.game_map.$canvas;
+
+        $canvas.on('click', function() {
+            outer.playground.hide();
+            outer.playground.root.menu.show();
+        });
+
+
+    }
+
+    win(){
+        this.state = "win";
+        let outer = this;
+        setTimeout(function(){
+            outer.add_listening_events();
+        }, 1000);
+    }
+
+    lose(){
+        this.state = "lose";
+        let outer = this;
+        setTimeout(function(){
+            outer.add_listening_events();
+        },1000);
+    }
+
+    update(){
+        this.render();
+    }
+
+    render(){
+        let len = this.playground.height / 2;
+        if(this.state === "win"){
+            this.ctx.drawImage(this.win_img, this.playground.width / 2 - len / 2, this.playground.height / 2 - len / 2, len, len);
+        }else if(this.state === "lose"){
+            this.ctx.drawImage(this.lose_img, this.playground.width / 2 - len / 2, this.playground.height / 2 - len / 2 , len, len);
+        }
     }
 
 }
@@ -823,15 +903,32 @@ class MyGamePlayground{
         this.chat_state = 0;
         this.start();
     }
+    create_uuid(){
+        let res="";
+        for(let i =0;i<8;i++){
+            res += Math.floor(Math.random() * 10);
+        }
+        return res;
+
+    }
     get_random_color(){
         let colors=["red","grey","green","pink","yellow","blue","orange"];
             return colors[Math.floor(Math.random()*colors.length)];
     }
     start(){
+        this.root.$my_game.append(this.$playground);
         let outer = this;
-        $(window).resize(function(){
+        let uuid = this.create_uuid();
+
+        $(window).on(`resize${uuid}`,(function(){
             outer.resize();
-        });
+        }));
+
+        if(this.root.AcwingOS){
+            this.root.AcwingOS.api.window.on_close(function(){
+                $(window).off(`resize${uuid}`);
+            });
+        }
     }
     resize(){
         this.width = this.$playground.width();
@@ -844,11 +941,12 @@ class MyGamePlayground{
     }
     show(mode){
         this.$playground.show();
-        this.root.$my_game.append(this.$playground);
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.game_map = new Game_Map(this);
         this.notice_board = new NoticeBoard(this);
+        this.score_board = new ScoreBoard(this);
+        this.player_count = 0;
         this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
         this.players = [];
@@ -869,6 +967,27 @@ class MyGamePlayground{
         }
     }
     hide(){
+        while (this.players && this.players.length > 0) {
+            this.players[0].destroy();
+        }
+
+        if (this.game_map) {
+            this.game_map.destroy();
+            this.game_map = null;
+        }
+
+        if (this.notice_board) {
+            this.notice_board.destroy();
+            this.notice_board = null;
+        }
+
+        if (this.score_board) {
+            this.score_board.destroy();
+            this.score_board = null;
+        }
+
+        this.$playground.empty();
+
         this.$playground.hide();
     }
 }

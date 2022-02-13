@@ -9,6 +9,11 @@ class MyGameObject{
     start(){
 
     }
+
+    last_update(){
+
+    }
+
     create_uuid(){
         let res="";
         for(let i=0;i<8;i++){
@@ -17,11 +22,15 @@ class MyGameObject{
         }
         return res;
     }
+
     update(){
 
     }
+
     on_destroy(){
+    
     }
+
     destroy(){
         this.on_destroy();
         for(let i=0; i<my_game_objects.length; i++){
@@ -45,6 +54,10 @@ let MY_GAME_ANIMATION=function(stamp){
             obj.timedelta=stamp-last_stamp;
             obj.update();
         }
+    }
+    for(let i=0;i<my_game_objects.length;i++){
+        let obj = my_game_objects[i];
+        obj.last_update();
     }
     last_stamp = stamp;
     requestAnimationFrame(MY_GAME_ANIMATION);

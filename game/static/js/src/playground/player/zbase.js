@@ -72,7 +72,7 @@ class Player extends MyGameObject{
                     let tx=(e.clientX - rect.left)/outer.playground.scale,ty=(e.clientY - rect.top)/outer.playground.scale;
                     if(outer.cur_skill === "fireball"){
                         let fireball=outer.shoot_fireball(tx,ty);
-                        outer.fireball_coldtime=2;
+                        outer.fireball_coldtime= 0.01;
                         outer.cur_skill = null;
                         if(outer.playground.mode === "multi mode"){
                             outer.playground.mps.send_shoot_fireball(tx,ty,fireball.uuid);
@@ -156,6 +156,7 @@ class Player extends MyGameObject{
         if(this.character === "me" && this.playground.state === "fighting")
         {
             this.playground.state = "over";
+            this.playground.score_board.lose();
         }
         for(let i=0;i<this.playground.players.length;i++){
             if(this.playground.players[i]==this){
@@ -219,11 +220,19 @@ class Player extends MyGameObject{
             let ty = player.y+player.vy*player.speed*0.2;
             this.shoot_fireball(tx,ty);
         }
+        this.update_win();
         this.update_move();
         if(this.character === "me" && this.playground.state === "fighting"){
             this.update_skill_coldtime();
         }
         this.render();
+    }
+
+    update_win(){
+        if(this.playground.state === "fighting" && this.character === "me" && this.playground.players.length === 1){
+            this.playground.state = "over";
+            this.playground.score_board.win();
+        }
     }
 
     update_skill_coldtime(){
