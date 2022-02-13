@@ -50,7 +50,6 @@ let MY_GAME_ANIMATION=function(stamp){
             obj.has_called_start=true;
             obj.start();
         }else{
-            //console.log("yes");
             obj.timedelta=stamp-last_stamp;
             obj.update();
         }

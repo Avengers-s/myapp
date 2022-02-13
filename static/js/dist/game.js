@@ -101,7 +101,6 @@ let MY_GAME_ANIMATION=function(stamp){
             obj.has_called_start=true;
             obj.start();
         }else{
-            //console.log("yes");
             obj.timedelta=stamp-last_stamp;
             obj.update();
         }
@@ -872,6 +871,16 @@ class MultiPlayerSocket{
             'ball_uuid':ball_uuid,
         }));
     }
+
+    send_remove_player(username){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "remove_player",
+            'uuid' : outer.uuid,
+            'username': username,
+        }));
+    }
+
     receive_attack(uuid,attackee_uuid,x,y,angle,damage,ball_uuid){
         let attacker = this.get_player(uuid);
         let attackee = this.get_player(attackee_uuid);
@@ -963,6 +972,9 @@ class MyGamePlayground{
             this.mps.uuid = this.players[0].uuid;
             this.mps.ws.onopen=function(){
                 outer.mps.send_create_player(outer.root.settings.username,outer.root.settings.photo);
+                outer.root.AcwingOS.api.window.on_close(function(){
+                    outer.mps.send_remove_player(outer.root.settings.username);
+                });
             };
         }
     }
@@ -1194,7 +1206,6 @@ class Settings {
             },
             success:function(resp){
                 if(resp.result === "success"){
-                    console.log(resp);
                     location.reload();
                 }else{
                     outer.$login_error_message.html(resp.result);
@@ -1218,7 +1229,6 @@ class Settings {
             type: "GET",
             success:function(resp){
                 if(resp.result === "success"){
-                    console.log(resp);
                     outer.acapp_login(resp.appid,resp.redirect_uri,resp.scope,resp.state);
                 }
             },
@@ -1233,7 +1243,6 @@ class Settings {
                 outer.hide();
                 outer.root.menu.show();
             }else{
-                console.log(resp);
             }
         });
     
@@ -1248,7 +1257,6 @@ class Settings {
             },
             success:function(resp){
                 if(resp.result === "success"){
-                    console.log(resp);
                     outer.username = resp.username;
                     outer.photo = resp.photo,
                     outer.hide();

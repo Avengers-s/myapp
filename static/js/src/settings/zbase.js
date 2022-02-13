@@ -201,7 +201,6 @@ class Settings {
             },
             success:function(resp){
                 if(resp.result === "success"){
-                    console.log(resp);
                     location.reload();
                 }else{
                     outer.$login_error_message.html(resp.result);
@@ -225,7 +224,6 @@ class Settings {
             type: "GET",
             success:function(resp){
                 if(resp.result === "success"){
-                    console.log(resp);
                     outer.acapp_login(resp.appid,resp.redirect_uri,resp.scope,resp.state);
                 }
             },
@@ -240,7 +238,6 @@ class Settings {
                 outer.hide();
                 outer.root.menu.show();
             }else{
-                console.log(resp);
             }
         });
     
@@ -255,7 +252,6 @@ class Settings {
             },
             success:function(resp){
                 if(resp.result === "success"){
-                    console.log(resp);
                     outer.username = resp.username;
                     outer.photo = resp.photo,
                     outer.hide();

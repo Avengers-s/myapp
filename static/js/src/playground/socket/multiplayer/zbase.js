@@ -123,6 +123,16 @@ class MultiPlayerSocket{
             'ball_uuid':ball_uuid,
         }));
     }
+
+    send_remove_player(username){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "remove_player",
+            'uuid' : outer.uuid,
+            'username': username,
+        }));
+    }
+
     receive_attack(uuid,attackee_uuid,x,y,angle,damage,ball_uuid){
         let attacker = this.get_player(uuid);
         let attackee = this.get_player(attackee_uuid);

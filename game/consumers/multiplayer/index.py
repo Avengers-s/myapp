@@ -17,13 +17,31 @@ class MultiPlayer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         print('disconnect')
+        await self.remove_player(self.data)
         if self.room_name:
             await self.channel_layer.group_discard(self.room_name, self.channel_name);
+
+    async def remove_player(self, data):
+        transport = TSocket.TSocket('localhost', 9090)
+        # Buffering is critical. Raw sockets are very slow
+        transport = TTransport.TBufferedTransport(transport)
+
+        # Wrap in a protocol
+        protocol = TBinaryProtocol.TBinaryProtocol(transport)
+
+        # Create a client to use the protocol encoder
+        client = Match.Client(protocol)
+        
+        # Connect!
+        transport.open()
+        client.remove_player(data['uuid'], data['username'])
+        # Close!
+        transport.close()
 
     async def create_player(self,data):
         # Make socket
         self.uuid = data['uuid']
-
+        self.data = data
         transport = TSocket.TSocket('localhost', 9090)
         # Buffering is critical. Raw sockets are very slow
         transport = TTransport.TBufferedTransport(transport)
@@ -159,3 +177,5 @@ class MultiPlayer(AsyncWebsocketConsumer):
             await self.blink(data)
         elif data['event'] == "send_message":
             await self.send_message(data)
+        elif data['event'] == "remove_player":
+            await self.remove_player(data)

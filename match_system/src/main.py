@@ -19,19 +19,24 @@ from django.core.cache import cache
 queue = Queue()
 
 class Player:
-    def __init__(self, score, uuid, username, photo, channel_name):
+    def __init__(self, score, uuid, username, photo, channel_name, tp):
         self.score = score
         self.uuid = uuid
         self.username = username
         self.photo = photo
         self.channel_name = channel_name
         self.waiting_time = 0
+        self.tp = tp
 
 class MatchHandler:
     def add_player(self, score, uuid, username, photo, channel_name):
-        player = Player(score, uuid, username, photo ,channel_name)
+        player = Player(score, uuid, username, photo ,channel_name, "add")
         queue.put(player)
-        
+        return 0
+
+    def remove_player(self, uuid, username):
+        player = Player(None, uuid, username, None, None, "remove")
+        queue.put(player)
         return 0
 
 class Pool:
@@ -39,7 +44,15 @@ class Pool:
         self.players = []
 
     def add_player(self, player):
+        # print(player.username + "进入匹配池")
         self.players.append(player)
+
+    def remove_player(self, player):
+        for i in range(len(self.players)):
+            if self.players[i].username == player.username:
+                self.players = self.players[:i] + self.players[i+1:]
+                # print(player.username + "退出匹配池")
+                break
 
     def increasing_waiting_time(self):
         for i in range(len(self.players)):
@@ -103,7 +116,10 @@ def worker():
     while True:
         player = get_player()
         if player:
-            pool.add_player(player)
+            if player.tp == "add":
+                pool.add_player(player)
+            else:
+                pool.remove_player(player)
         else:
             pool.match()
             sleep(1)
