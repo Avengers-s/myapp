@@ -855,7 +855,7 @@ class MultiPlayerSocket{
             0.5,
             0.05,
             "white",
-            0.25,
+            0.15,
             "enemy",
             username,
             photo,
