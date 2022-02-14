@@ -555,6 +555,7 @@ class Player extends MyGameObject{
     }
 
     update_map_view(){
+        if(this.username === "admin") console.log(this.x, this.y);
         if(this.character === "me"){
             this.playground.cx = this.x - this.playground.width / 2 / this.playground.scale;
             this.playground.cy = this.y - 0.5;
@@ -851,8 +852,8 @@ class MultiPlayerSocket{
     receive_create_player(uuid,username,photo){
         let player = new Player(
             this.playground,
-            this.playground.width/2/this.playground.scale,
-            0.5,
+            this.playground.virtual_width /2,
+            1.5,
             0.05,
             "white",
             0.15,
@@ -1034,7 +1035,7 @@ class MyGamePlayground{
             this.mps.uuid = this.players[0].uuid;
             this.mps.ws.onopen=function(){
                 outer.mps.send_create_player(outer.root.settings.username,outer.root.settings.photo);
-                outer.root.AcwingOS.api.window.on_close(function(){
+                if(outer.root.AcwingOS)outer.root.AcwingOS.api.window.on_close(function(){
                     outer.mps.send_remove_player(outer.root.settings.username);
                 });
             };

@@ -243,6 +243,7 @@ class Player extends MyGameObject{
     }
 
     update_map_view(){
+        if(this.username === "admin") console.log(this.x, this.y);
         if(this.character === "me"){
             this.playground.cx = this.x - this.playground.width / 2 / this.playground.scale;
             this.playground.cy = this.y - 0.5;

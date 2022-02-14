@@ -48,8 +48,8 @@ class MultiPlayerSocket{
     receive_create_player(uuid,username,photo){
         let player = new Player(
             this.playground,
-            this.playground.width/2/this.playground.scale,
-            0.5,
+            this.playground.virtual_width /2,
+            1.5,
             0.05,
             "white",
             0.15,
