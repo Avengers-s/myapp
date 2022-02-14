@@ -181,6 +181,41 @@ class ChatField {
         },3000);
     }
 }
+class Grid extends MyGameObject{
+    constructor(playground, x, y, r){
+        super();
+        this.playground = playground;
+        this.ctx = this.playground.game_map.ctx;
+        this.x = x;
+        this.y = y;
+        this.r = r;
+    }
+    start(){
+
+    }
+
+    update(){
+        this.render();
+    }
+
+    render(){
+        let w = this.playground.virtual_width / 32;
+        let h = this.playground.virtual_height / 18;
+        let r = 18, c = 32;
+        for(let i = 0;i < r ; i++){
+            for(let j=0; j<c; j++){
+                let cx = j * w, cy = i * h;
+                let color = "rgba(60,60,60,0.5)";
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect((cx - this.playground.cx) * this.playground.scale, (cy - this.playground.cy) * this.playground.scale, w * this.playground.scale, h *this.playground.scale);
+                this.ctx.strokeStyle = "rgba(60, 60, 60, 0.5)";
+                this.ctx.lineWidth = 0.005 * this.playground.scale;
+                this.ctx.strokeRect((cx - this.playground.cx) * this.playground.scale, (cy - this.playground.cy) * this.playground.scale, w * this.playground.scale, h * this.playground.scale);
+
+            }
+        }
+    }
+}
 class Game_Map extends MyGameObject{
     constructor(playground){
         super();
@@ -205,8 +240,10 @@ class Game_Map extends MyGameObject{
         this.render();
     }
     render(){
-        this.ctx.fillStyle="rgba(0,0,0,0.2)";
+        this.ctx.fillStyle="rgba(0,0,0, 1)";
         this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
+       // this.ctx.fillStyle="rgba(100,100,100, 0.2)";
+        //this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
     }
 
 }
@@ -268,7 +305,7 @@ class Particle extends MyGameObject{
     }
     render(){
         this.ctx.beginPath();
-        this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
+        this.ctx.arc((this.x - this.playground.cx)*this.playground.scale,(this.y-this.playground.cy)*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
         this.ctx.fillStyle=this.color;
         this.ctx.fill();
     }
@@ -321,7 +358,7 @@ class Player extends MyGameObject{
         }
         this.add_listening_events();
         if(this.character === "robot"){
-            this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
+            this.move_to(this.playground.virtual_width * Math.random(),this.playground.virtual_height * Math.random());
         }
     }
 
@@ -338,6 +375,8 @@ class Player extends MyGameObject{
                 let rect=outer.ctx.canvas.getBoundingClientRect();
                 if(e.which === 3){
                     let tx=(e.clientX - rect.left)/outer.playground.scale,ty=(e.clientY - rect.top)/outer.playground.scale;
+                    tx += outer.playground.cx;
+                    ty += outer.playground.cy;
                     outer.move_to(tx,ty);
                     outer.click_effect(tx,ty);
                     if(outer.playground.mode === "multi mode"){
@@ -346,6 +385,8 @@ class Player extends MyGameObject{
                 }else if(e.which === 1){
                     let tx=(e.clientX - rect.left)/outer.playground.scale,ty=(e.clientY - rect.top)/outer.playground.scale;
                     if(outer.cur_skill === "fireball"){
+                        tx += outer.playground.cx;
+                        ty += outer.playground.cy;
                         let fireball=outer.shoot_fireball(tx,ty);
                         outer.fireball_coldtime= 0.01;
                         outer.cur_skill = null;
@@ -353,6 +394,8 @@ class Player extends MyGameObject{
                             outer.playground.mps.send_shoot_fireball(tx,ty,fireball.uuid);
                         }
                     }else if(outer.cur_skill === "blink"){
+                        tx += outer.playground.cx;
+                        ty += outer.playground.cy;
                         outer.blink(tx,ty);
                         outer.cur_skill = null;
                         outer.blink_coldtime = 4;
@@ -500,6 +543,7 @@ class Player extends MyGameObject{
         if(this.character === "me" && this.playground.state === "fighting"){
             this.update_skill_coldtime();
         }
+        this.update_map_view();
         this.render();
     }
 
@@ -507,6 +551,17 @@ class Player extends MyGameObject{
         if(this.playground.state === "fighting" && this.character === "me" && this.playground.players.length === 1){
             this.playground.state = "over";
             this.playground.score_board.win();
+        }
+    }
+
+    update_map_view(){
+        if(this.character === "me"){
+            this.playground.cx = this.x - this.playground.width / 2 / this.playground.scale;
+            this.playground.cy = this.y - 0.5;
+            this.playground.cx = Math.max(0, this.playground.cx);
+            this.playground.cx = Math.min(this.playground.virtual_width - this.playground.width / this.playground.scale, this.playground.cx);
+            this.playground.cy = Math.max(0, this.playground.cy);
+            this.playground.cy = Math.min(this.playground.virtual_height - 1, this.playground.cy);
         }
     }
 
@@ -536,7 +591,7 @@ class Player extends MyGameObject{
                     this.vx=this.vy=0;
                     this.move_length=0;
                 }else{
-                    this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
+                    this.move_to(this.playground.virtual_width * Math.random(),this.playground.virtual_height * Math.random());
                 }
             }
         }
@@ -546,15 +601,15 @@ class Player extends MyGameObject{
         if(this.character !== "robot"){
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x*this.playground.scale, this.y*this.playground.scale, this.radius*this.playground.scale, 0, Math.PI * 2, false);
+            this.ctx.arc((this.x - this.playground.cx)*this.playground.scale, (this.y-this.playground.cy)*this.playground.scale, this.radius*this.playground.scale, 0, Math.PI * 2, false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, (this.x - this.radius)*this.playground.scale, (this.y - this.radius)*this.playground.scale, this.radius * 2*this.playground.scale, this.radius * 2*this.playground.scale); 
+            this.ctx.drawImage(this.img, (this.x - this.playground.cx - this.radius)*this.playground.scale, (this.y - this.playground.cy - this.radius)*this.playground.scale, this.radius * 2*this.playground.scale, this.radius * 2*this.playground.scale); 
             this.ctx.restore();
         }
         else{
             this.ctx.beginPath();
-            this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
+            this.ctx.arc((this.x - this.playground.cx )*this.playground.scale,(this.y - this.playground.cy )*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
             this.ctx.fillStyle=this.color;
             this.ctx.fill();
         }
@@ -581,7 +636,7 @@ class Player extends MyGameObject{
             this.ctx.fillStyle="rgba(0,0,255,0.6)";
             this.ctx.fill();
         }
-        
+
         x=1.62,y=0.9,r=0.04;
         this.ctx.save();
         this.ctx.beginPath();
@@ -741,7 +796,7 @@ class FireBall extends MyGameObject{
     }
     render(){
         this.ctx.beginPath();
-        this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
+        this.ctx.arc((this.x - this.playground.cx)*this.playground.scale,(this.y - this.playground.cy) * this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
         this.ctx.fillStyle=this.color;
         this.ctx.fill();
     }
@@ -910,6 +965,8 @@ class MyGamePlayground{
         this.hide();
         this.player_count=0;
         this.chat_state = 0;
+        this.cx = 0;
+        this.cy = 0;
         this.start();
     }
     create_uuid(){
@@ -928,14 +985,14 @@ class MyGamePlayground{
         this.root.$my_game.append(this.$playground);
         let outer = this;
         let uuid = this.create_uuid();
-
-        $(window).on(`resize${uuid}`,(function(){
+        
+        $(window).on(`resize.${uuid}`,(function(){
             outer.resize();
         }));
 
         if(this.root.AcwingOS){
             this.root.AcwingOS.api.window.on_close(function(){
-                $(window).off(`resize${uuid}`);
+                $(window).off(`resize.${uuid}`);
             });
         }
     }
@@ -946,6 +1003,10 @@ class MyGamePlayground{
         this.width = unit*16;
         this.height = unit*9;
         this.scale = this.height;
+        this.virtual_width = this.width / this.scale * 3;
+        this.virtual_height = 3;
+        this.cx = this.virtual_width / 2 - this.width / 2 / this.scale;
+        this.cy = this.virtual_height / 2 - this.height / 2 / this.scale;
         if(this.game_map)this.game_map.resize();
     }
     show(mode){
@@ -955,15 +1016,16 @@ class MyGamePlayground{
         this.game_map = new Game_Map(this);
         this.notice_board = new NoticeBoard(this);
         this.score_board = new ScoreBoard(this);
+        this.grid = new Grid(this);
         this.player_count = 0;
         this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
         this.players = [];
         this.mode=mode;
-        this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
+        this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
         if(mode === "single mode"){
-            for(let i=0;i<5;i++){
-                this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,"robot"));
+            for(let i=0;i<15;i++){
+                this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,"robot"));
             }
         }else{
             let outer = this;

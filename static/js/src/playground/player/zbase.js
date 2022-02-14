@@ -46,7 +46,7 @@ class Player extends MyGameObject{
         }
         this.add_listening_events();
         if(this.character === "robot"){
-            this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
+            this.move_to(this.playground.virtual_width * Math.random(),this.playground.virtual_height * Math.random());
         }
     }
 
@@ -63,6 +63,8 @@ class Player extends MyGameObject{
                 let rect=outer.ctx.canvas.getBoundingClientRect();
                 if(e.which === 3){
                     let tx=(e.clientX - rect.left)/outer.playground.scale,ty=(e.clientY - rect.top)/outer.playground.scale;
+                    tx += outer.playground.cx;
+                    ty += outer.playground.cy;
                     outer.move_to(tx,ty);
                     outer.click_effect(tx,ty);
                     if(outer.playground.mode === "multi mode"){
@@ -71,6 +73,8 @@ class Player extends MyGameObject{
                 }else if(e.which === 1){
                     let tx=(e.clientX - rect.left)/outer.playground.scale,ty=(e.clientY - rect.top)/outer.playground.scale;
                     if(outer.cur_skill === "fireball"){
+                        tx += outer.playground.cx;
+                        ty += outer.playground.cy;
                         let fireball=outer.shoot_fireball(tx,ty);
                         outer.fireball_coldtime= 0.01;
                         outer.cur_skill = null;
@@ -78,6 +82,8 @@ class Player extends MyGameObject{
                             outer.playground.mps.send_shoot_fireball(tx,ty,fireball.uuid);
                         }
                     }else if(outer.cur_skill === "blink"){
+                        tx += outer.playground.cx;
+                        ty += outer.playground.cy;
                         outer.blink(tx,ty);
                         outer.cur_skill = null;
                         outer.blink_coldtime = 4;
@@ -225,6 +231,7 @@ class Player extends MyGameObject{
         if(this.character === "me" && this.playground.state === "fighting"){
             this.update_skill_coldtime();
         }
+        this.update_map_view();
         this.render();
     }
 
@@ -232,6 +239,17 @@ class Player extends MyGameObject{
         if(this.playground.state === "fighting" && this.character === "me" && this.playground.players.length === 1){
             this.playground.state = "over";
             this.playground.score_board.win();
+        }
+    }
+
+    update_map_view(){
+        if(this.character === "me"){
+            this.playground.cx = this.x - this.playground.width / 2 / this.playground.scale;
+            this.playground.cy = this.y - 0.5;
+            this.playground.cx = Math.max(0, this.playground.cx);
+            this.playground.cx = Math.min(this.playground.virtual_width - this.playground.width / this.playground.scale, this.playground.cx);
+            this.playground.cy = Math.max(0, this.playground.cy);
+            this.playground.cy = Math.min(this.playground.virtual_height - 1, this.playground.cy);
         }
     }
 
@@ -261,7 +279,7 @@ class Player extends MyGameObject{
                     this.vx=this.vy=0;
                     this.move_length=0;
                 }else{
-                    this.move_to(this.playground.width*Math.random()/this.playground.scale,this.playground.height*Math.random()/this.playground.scale);
+                    this.move_to(this.playground.virtual_width * Math.random(),this.playground.virtual_height * Math.random());
                 }
             }
         }
@@ -271,15 +289,15 @@ class Player extends MyGameObject{
         if(this.character !== "robot"){
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x*this.playground.scale, this.y*this.playground.scale, this.radius*this.playground.scale, 0, Math.PI * 2, false);
+            this.ctx.arc((this.x - this.playground.cx)*this.playground.scale, (this.y-this.playground.cy)*this.playground.scale, this.radius*this.playground.scale, 0, Math.PI * 2, false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, (this.x - this.radius)*this.playground.scale, (this.y - this.radius)*this.playground.scale, this.radius * 2*this.playground.scale, this.radius * 2*this.playground.scale); 
+            this.ctx.drawImage(this.img, (this.x - this.playground.cx - this.radius)*this.playground.scale, (this.y - this.playground.cy - this.radius)*this.playground.scale, this.radius * 2*this.playground.scale, this.radius * 2*this.playground.scale); 
             this.ctx.restore();
         }
         else{
             this.ctx.beginPath();
-            this.ctx.arc(this.x*this.playground.scale,this.y*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
+            this.ctx.arc((this.x - this.playground.cx )*this.playground.scale,(this.y - this.playground.cy )*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
             this.ctx.fillStyle=this.color;
             this.ctx.fill();
         }
@@ -306,7 +324,7 @@ class Player extends MyGameObject{
             this.ctx.fillStyle="rgba(0,0,255,0.6)";
             this.ctx.fill();
         }
-        
+
         x=1.62,y=0.9,r=0.04;
         this.ctx.save();
         this.ctx.beginPath();

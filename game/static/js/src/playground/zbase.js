@@ -5,6 +5,8 @@ class MyGamePlayground{
         this.hide();
         this.player_count=0;
         this.chat_state = 0;
+        this.cx = 0;
+        this.cy = 0;
         this.start();
     }
     create_uuid(){
@@ -23,14 +25,14 @@ class MyGamePlayground{
         this.root.$my_game.append(this.$playground);
         let outer = this;
         let uuid = this.create_uuid();
-
-        $(window).on(`resize${uuid}`,(function(){
+        
+        $(window).on(`resize.${uuid}`,(function(){
             outer.resize();
         }));
 
         if(this.root.AcwingOS){
             this.root.AcwingOS.api.window.on_close(function(){
-                $(window).off(`resize${uuid}`);
+                $(window).off(`resize.${uuid}`);
             });
         }
     }
@@ -41,6 +43,10 @@ class MyGamePlayground{
         this.width = unit*16;
         this.height = unit*9;
         this.scale = this.height;
+        this.virtual_width = this.width / this.scale * 3;
+        this.virtual_height = 3;
+        this.cx = this.virtual_width / 2 - this.width / 2 / this.scale;
+        this.cy = this.virtual_height / 2 - this.height / 2 / this.scale;
         if(this.game_map)this.game_map.resize();
     }
     show(mode){
@@ -50,15 +56,16 @@ class MyGamePlayground{
         this.game_map = new Game_Map(this);
         this.notice_board = new NoticeBoard(this);
         this.score_board = new ScoreBoard(this);
+        this.grid = new Grid(this);
         this.player_count = 0;
         this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
         this.players = [];
         this.mode=mode;
-        this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
+        this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
         if(mode === "single mode"){
-            for(let i=0;i<5;i++){
-                this.players.push(new Player(this,this.width/2/this.scale,this.height/2/this.scale,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,"robot"));
+            for(let i=0;i<15;i++){
+                this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,"robot"));
             }
         }else{
             let outer = this;
