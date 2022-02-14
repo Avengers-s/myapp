@@ -54,18 +54,18 @@ class MyGamePlayground{
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.game_map = new Game_Map(this);
+        this.grid = new Grid(this);
         this.notice_board = new NoticeBoard(this);
         this.score_board = new ScoreBoard(this);
-        this.grid = new Grid(this);
         this.player_count = 0;
         this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
         this.players = [];
         this.mode=mode;
-        this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
+        this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.15/this.scale,"me",this.root.settings.username,this.root.settings.photo));
         if(mode === "single mode"){
             for(let i=0;i<15;i++){
-                this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,"robot"));
+                this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.15/this.scale,"robot"));
             }
         }else{
             let outer = this;
@@ -99,7 +99,10 @@ class MyGamePlayground{
             this.score_board.destroy();
             this.score_board = null;
         }
-
+        if(this.grid){
+            this.grid.destroy();
+            this.grid = null;
+        }
         this.$playground.empty();
 
         this.$playground.hide();

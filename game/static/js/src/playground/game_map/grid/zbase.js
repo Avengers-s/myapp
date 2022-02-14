@@ -22,10 +22,10 @@ class Grid extends MyGameObject{
         for(let i = 0;i < r ; i++){
             for(let j=0; j<c; j++){
                 let cx = j * w, cy = i * h;
-                let color = "rgba(60,60,60,0.5)";
+                let color = "rgba(55,55,55,0.5)";
                 this.ctx.fillStyle = color;
                 this.ctx.fillRect((cx - this.playground.cx) * this.playground.scale, (cy - this.playground.cy) * this.playground.scale, w * this.playground.scale, h *this.playground.scale);
-                this.ctx.strokeStyle = "rgba(60, 60, 60, 0.5)";
+                this.ctx.strokeStyle = "rgba(55, 55, 55, 0.5)";
                 this.ctx.lineWidth = 0.005 * this.playground.scale;
                 this.ctx.strokeRect((cx - this.playground.cx) * this.playground.scale, (cy - this.playground.cy) * this.playground.scale, w * this.playground.scale, h * this.playground.scale);
 

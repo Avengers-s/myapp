@@ -205,10 +205,10 @@ class Grid extends MyGameObject{
         for(let i = 0;i < r ; i++){
             for(let j=0; j<c; j++){
                 let cx = j * w, cy = i * h;
-                let color = "rgba(60,60,60,0.5)";
+                let color = "rgba(55,55,55,0.5)";
                 this.ctx.fillStyle = color;
                 this.ctx.fillRect((cx - this.playground.cx) * this.playground.scale, (cy - this.playground.cy) * this.playground.scale, w * this.playground.scale, h *this.playground.scale);
-                this.ctx.strokeStyle = "rgba(60, 60, 60, 0.5)";
+                this.ctx.strokeStyle = "rgba(55, 55, 55, 0.5)";
                 this.ctx.lineWidth = 0.005 * this.playground.scale;
                 this.ctx.strokeRect((cx - this.playground.cx) * this.playground.scale, (cy - this.playground.cy) * this.playground.scale, w * this.playground.scale, h * this.playground.scale);
 
@@ -292,7 +292,7 @@ class Particle extends MyGameObject{
         
     }
     update(){
-        if(this.speed < this.eps || this.move_length < this.eps){
+        if(this.speed < this.eps * 1.5 || this.move_length < this.eps * 1.5){
             this.destroy();
             return false;
         }
@@ -441,7 +441,7 @@ class Player extends MyGameObject{
     }
     blink(tx,ty){
         let d=this.get_dist(this.x,this.y,tx,ty);
-        d = Math.min(d,0.8);
+        d = Math.min(d,0.4);
         let angle = Math.atan2(ty-this.y,tx-this.x);
         this.x+=d*Math.cos(angle);
         this.y+=d*Math.sin(angle);
@@ -450,13 +450,13 @@ class Player extends MyGameObject{
     click_effect(tx, ty){
         for(let i=0;i<20+Math.random()*10;i++){
             let x=tx,y=ty;
-            let radius = this.playground.height *0.05 * 0.05 * Math.random();
+            let radius = this.playground.height *0.06 * 0.06 * Math.random();
             let angle = Math.PI * 2 * Math.random();
             let vx = Math.cos(angle);
             let vy = Math.sin(angle);
             let color = "white";
-            let speed = this.playground.height * 0.3;
-            let move_length = this.playground.height *0.04 *Math.random();
+            let speed = this.playground.height * 0.5;
+            let move_length = this.playground.height *0.05 *Math.random();
             new Particle(this.playground,this, x, y, vx, vy, radius/this.playground.scale, color, speed/this.playground.scale, move_length/this.playground.scale);
         }
     }
@@ -486,12 +486,12 @@ class Player extends MyGameObject{
     is_attack(angle,damage){
         for(let i=0;i<20+Math.random()*10;i++){
             let x=this.x,y=this.y;
-            let radius = this.radius*Math.random()*0.06;
+            let radius = this.radius*Math.random()*0.08;
             let angle = Math.PI * 2* Math.random();
             let vx=Math.cos(angle),vy=Math.sin(angle);
             let color = this.color;
-            let speed = this.speed * 3;
-            let move_length = this.radius * Math.random() * 3;
+            let speed = this.speed * 4;
+            let move_length = this.radius * Math.random() * 6;
             new Particle(this.playground, this, x, y, vx, vy, radius, color, speed ,move_length);
         }
         this.radius -= damage;
@@ -532,7 +532,7 @@ class Player extends MyGameObject{
     }
     update(){
         this.spent_time+=this.timedelta/1000;
-        if(this.character === "robot" && this.spent_time>4 && Math.random() < 1.0/300){
+        if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1.0/100){
             let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];
             let tx = player.x+player.vx*player.speed*0.2;
             let ty = player.y+player.vy*player.speed*0.2;
@@ -1014,18 +1014,18 @@ class MyGamePlayground{
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.game_map = new Game_Map(this);
+        this.grid = new Grid(this);
         this.notice_board = new NoticeBoard(this);
         this.score_board = new ScoreBoard(this);
-        this.grid = new Grid(this);
         this.player_count = 0;
         this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
         this.players = [];
         this.mode=mode;
-        this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.25/this.scale,"me",this.root.settings.username,this.root.settings.photo));
+        this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.15/this.scale,"me",this.root.settings.username,this.root.settings.photo));
         if(mode === "single mode"){
             for(let i=0;i<15;i++){
-                this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.25/this.scale,"robot"));
+                this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.15/this.scale,"robot"));
             }
         }else{
             let outer = this;
@@ -1059,7 +1059,10 @@ class MyGamePlayground{
             this.score_board.destroy();
             this.score_board = null;
         }
-
+        if(this.grid){
+            this.grid.destroy();
+            this.grid = null;
+        }
         this.$playground.empty();
 
         this.$playground.hide();
