@@ -24,11 +24,13 @@ class MultiPlayerSocket{
             }else if(event === "shoot_fireball"){
                 outer.receive_shoot_fireball(uuid,data.tx,data.ty,data.ball_uuid);
             }else if(event === "attack"){
-                outer.receive_attack(uuid,data.attackee_uuid,data.x,data.y,data.angle,data.damage,data.ball_uuid);
+                outer.receive_attack(uuid,data.attackee_uuid,data.x,data.y,data.angle,data.damage,data.ball_uuid,data.attack_type);
             }else if(event === "blink"){
                 outer.receive_blink(uuid,data.tx,data.ty);
             }else if(event === "send_message"){
                 outer.receive_message(uuid,data.username,data.text);
+            }else if(event === "shoot_iceball"){
+                outer.receive_shoot_iceball(uuid,data.tx,data.ty,data.ball_uuid);
             }
         }
     }
@@ -103,6 +105,17 @@ class MultiPlayerSocket{
             'ball_uuid': ball_uuid,
         }));
     }
+
+    send_shoot_iceball(tx,ty,ball_uuid){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "shoot_iceball",
+            'uuid': outer.uuid,
+            'tx': tx,
+            'ty': ty,
+            'ball_uuid': ball_uuid,
+        }));
+    }
     receive_shoot_fireball(uuid,tx,ty,ball_uuid){
         let player = this.get_player(uuid);
         if(player){
@@ -110,7 +123,14 @@ class MultiPlayerSocket{
             fireball.uuid = ball_uuid;
         }
     }
-    send_attack(attackee_uuid,x,y,angle,damage,ball_uuid){
+    receive_shoot_iceball(uuid,tx,ty,ball_uuid){
+        let player = this.get_player(uuid);
+        if(player){
+            let iceball = player.shoot_iceball(tx,ty);
+            iceball.uuid = ball_uuid;
+        }
+    }
+    send_attack(attackee_uuid,x,y,angle,damage,ball_uuid,attack_type){
         let outer = this;
         this.ws.send(JSON.stringify({
             'event': "attack",
@@ -121,6 +141,7 @@ class MultiPlayerSocket{
             'angle':angle,
             'damage':damage,
             'ball_uuid':ball_uuid,
+            'attack_type': attack_type,
         }));
     }
 
@@ -133,11 +154,11 @@ class MultiPlayerSocket{
         }));
     }
 
-    receive_attack(uuid,attackee_uuid,x,y,angle,damage,ball_uuid){
+    receive_attack(uuid,attackee_uuid,x,y,angle,damage,ball_uuid,attack_type){
         let attacker = this.get_player(uuid);
         let attackee = this.get_player(attackee_uuid);
         if(attacker && attackee){
-            attackee.receive_attack(x,y,angle,damage,ball_uuid,attacker);
+            attackee.receive_attack(x,y,angle,damage,ball_uuid,attacker,attack_type);
         }
     }
 
@@ -154,4 +175,5 @@ class MultiPlayerSocket{
         let player = this.get_player(uuid);
         if(player)player.blink(tx,ty);
     }
+
 }

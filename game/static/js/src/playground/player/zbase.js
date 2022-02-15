@@ -20,9 +20,11 @@ class Player extends MyGameObject{
         this.damage_vx=0;
         this.damage_vy=0;
         this.damage_speed=0;
+        this.reduce_speed_time = 0;
         this.spent_time=0;
         this.fireballs = [];
         this.hp = 100;
+        this.iceballs = [];
         if(this.character !== "robot"){
             this.img = new Image();
             this.img.src = this.photo;
@@ -37,6 +39,9 @@ class Player extends MyGameObject{
             this.blink_real_coldtime = 4;
             this.blink_img = new Image();
             this.blink_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_daccabdc53-blink.png";
+
+            this.iceball_coldtime = 0.01;
+            this.iceball_real_coldtime = 0.01;
         }
 
     }
@@ -94,6 +99,15 @@ class Player extends MyGameObject{
                             outer.playground.mps.send_blink(tx,ty);
                         }
 
+                    }else if(outer.cur_skill === "iceball"){
+                        tx += outer.playground.cx;
+                        ty += outer.playground.cy;
+                        let iceball = outer.shoot_iceball(tx,ty);
+                        outer.iceball_coldtime = outer.iceball_real_coldtime;
+                        outer.cur_skill = null;
+                        if(outer.playground.mode === "multi mode"){
+                            outer.playground.mps.send_shoot_iceball(tx, ty, iceball.uuid);
+                        }
                     }
                 }
             });
@@ -114,7 +128,7 @@ class Player extends MyGameObject{
                 if(outer.playground.state!=="fighting"){
                     return true;
                 }
-                if(e.which === 81){
+                if(e.which === 81){//q
                     if(outer.fireball_coldtime > outer.eps){
                         return true;
                     }
@@ -126,7 +140,13 @@ class Player extends MyGameObject{
                     }
                     outer.cur_skill = "blink";
                     return false;
-                }
+                }else if(e.which === 87){//w
+                    if(outer.iceball_coldtime > outer.eps){
+                        return true;
+                    }
+                    outer.cur_skill = "iceball";
+                    return false;
+            }
             });
         }
     }
@@ -147,7 +167,7 @@ class Player extends MyGameObject{
             let vy = Math.sin(angle);
             let color = "white";
             let speed = this.playground.height * 0.5;
-            let move_length = this.playground.height *0.05 *Math.random();
+            let move_length = this.playground.height *0.09 *Math.random();
             new Particle(this.playground,this, x, y, vx, vy, radius/this.playground.scale, color, speed/this.playground.scale, move_length/this.playground.scale);
         }
     }
@@ -159,6 +179,19 @@ class Player extends MyGameObject{
         let fireball = new FireBall(this.playground, this, this.x, this.y, this.playground.height*0.01/this.playground.scale,vx,vy,this.playground.height*0.5/this.playground.scale,this.playground.height/this.playground.scale,"orange",10);
         this.fireballs.push(fireball);
         return fireball;
+    }
+
+    shoot_iceball(tx,ty){
+        let angle = Math.atan2(ty - this.y, tx - this.x);
+        let vx = Math.cos(angle);
+        let vy = Math.sin(angle);
+        let radius = this.playground.height*0.015/this.playground.scale;
+        let speed = this.playground.height * 0.5 /this.playground.scale;
+        let move_length = this.playground.height / this.playground.scale;
+        let color = "white";
+        let iceball = new Ice_Ball(this.playground, this, this.x + this.radius * vx, this.y + this.radius * vy, radius, vx, vy, speed, move_length, color, 5);
+        this.iceballs.push(iceball);
+        return iceball;
     }
 
     on_destroy(){
@@ -174,15 +207,45 @@ class Player extends MyGameObject{
             }
         }
     }
-    is_attack(angle,damage){
-        for(let i=0;i<20+Math.random()*10;i++){
+
+    is_attack(angle,damage,tp){
+        if(tp === "fireball") this.is_attack_fireball(angle,damage);
+        else if(tp === "iceball") this.is_attack_iceball(angle,damage);
+    }
+
+    is_attack_iceball(angle,damage){
+        for(let i=0;i<20+Math.random()*15;i++){
             let x=this.x,y=this.y;
-            let radius = this.radius*Math.random()*0.08;
+            let radius = this.radius*Math.random()*0.13;
             let angle = Math.PI * 2* Math.random();
             let vx=Math.cos(angle),vy=Math.sin(angle);
             let color = this.color;
-            let speed = this.speed * 4;
-            let move_length = this.radius * Math.random() * 6;
+            let speed = this.speed * 6;
+            let move_length = this.radius * Math.random() * 7;
+            new Particle(this.playground, this, x, y, vx, vy, radius, color, speed ,move_length);
+        }
+        // this.radius -= damage;
+        this.hp -= damage;
+        if(this.hp < this.eps){
+            this.destroy();
+            return false;
+        }
+        this.damage_vx=Math.cos(angle);
+        this.damage_vy=Math.sin(angle);
+        this.damage_speed = this.playground.height  / this.playground.scale;
+        this.reduce_speed_time = 3;
+
+
+    }
+    is_attack_fireball(angle,damage){
+        for(let i=0;i<20+Math.random()*15;i++){
+            let x=this.x,y=this.y;
+            let radius = this.radius*Math.random()*0.13;
+            let angle = Math.PI * 2* Math.random();
+            let vx=Math.cos(angle),vy=Math.sin(angle);
+            let color = this.color;
+            let speed = this.speed * 6;
+            let move_length = this.radius * Math.random() * 7;
             new Particle(this.playground, this, x, y, vx, vy, radius, color, speed ,move_length);
         }
         // this.radius -= damage;
@@ -199,17 +262,28 @@ class Player extends MyGameObject{
     destroy_fireball(uuid){
         for(let i=0;i<this.fireballs.length;i++){
             let fireball = this.fireballs[i];
-            if(fireball.uuid == uuid){
+            if(fireball.uuid === uuid){
                 fireball.destroy();
                 break;
             }
         }
     }
-    receive_attack(x,y,angle,damage,ball_uuid,attacker){
-        attacker.destroy_fireball(ball_uuid);
+
+    destroy_iceball(uuid){
+        for(let i =0;i<this.iceballs.length;i++){
+            let iceball = this.iceballs[i];
+            if(iceball.uuid === uuid){
+                iceball.destroy();
+                break;
+            }
+        }
+    }
+    receive_attack(x,y,angle,damage,ball_uuid,attacker,attack_type){
+        if(attack_type === "fireball")attacker.destroy_fireball(ball_uuid);
+        else if(attack_type === "iceball") attacker.destroy_iceball(ball_uuid);
         this.x=x;
         this.y=y;
-        this.is_attack(angle,damage);
+        this.is_attack(angle,damage,attack_type);
     }
     get_dist(x1,y1,x2,y2){
         let xx=x2-x1;
@@ -235,6 +309,7 @@ class Player extends MyGameObject{
         if(this.character === "me" && this.playground.state === "fighting"){
             this.update_skill_coldtime();
         }
+        this.update_debuff();
         this.update_map_view();
         this.update_notice_board();
         this.render();
@@ -242,6 +317,12 @@ class Player extends MyGameObject{
 
     update_notice_board(){
         if(this.playground.state === "fighting")this.playground.notice_board.write("Fighting" + "("+ this.playground.players.length + "/" + this.playground.player_count + ")");
+    }
+
+
+    update_debuff(){
+        this.reduce_speed_time -= this.timedelta / 1000;
+        this.reduce_speed_time = Math.max(0,this.reduce_speed_time);
     }
 
     update_win(){
@@ -279,7 +360,9 @@ class Player extends MyGameObject{
             this.damage_speed *= this.friction;
         }else{
             if(this.move_length>this.eps){
-                let moved = Math.min(this.move_length,this.speed*this.timedelta/1000);
+                let moved = 0;
+                if(this.reduce_speed_time < this.eps)moved = Math.min(this.move_length,this.speed*this.timedelta/1000);
+                else moved = Math.min(this.move_length,this.speed*0.5*this.timedelta / 1000);
                 this.x+=this.vx*moved;
                 this.y+=this.vy*moved;
                 this.move_length-=moved;
@@ -318,6 +401,31 @@ class Player extends MyGameObject{
         }
 
         this.render_blood();
+        this.render_debuff();
+    }
+
+    render_debuff(){
+        if(this.reduce_speed_time > this.eps){
+            if(this.move_length > this.eps){
+                for(let i = 1 ;i<=20;i++){
+                    let moved = this.radius + this.radius * Math.random();
+                    let x = this.x - moved * this.vx - this.radius * this.vy;
+                    let y = this.y - moved * this.vy - this.radius * this.vx;
+                    for(let j=0;j<=2*this.radius;j+= this.radius * 1/10){
+                        let radius = this.radius* Math.random()*0.1;
+                        x += this.radius * 1/10 * this.vy;
+                        y += this.radius * 1/10 * this.vx;
+                        this.ctx.save();
+                        this.ctx.beginPath();
+                        this.ctx.arc((x - this.playground.cx )*this.playground.scale,(y - this.playground.cy )*this.playground.scale,radius*this.playground.scale,0,Math.PI *2,false);
+                        this.ctx.fillStyle= "white";
+                        this.ctx.fill();
+                        this.ctx.restore();
+
+                    }
+                }
+            }
+        }
     }
 
     render_blood(){

@@ -56,6 +56,7 @@ class MyGamePlayground{
         this.$playground.show();
         this.width = this.$playground.width();
         this.height = this.$playground.height();
+        this.bgm = new Audio(this);
         this.game_map = new Game_Map(this);
         this.grid = new Grid(this);
         this.notice_board = new NoticeBoard(this);
