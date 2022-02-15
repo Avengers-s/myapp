@@ -22,16 +22,19 @@ class Player extends MyGameObject{
         this.damage_speed=0;
         this.spent_time=0;
         this.fireballs = [];
+        this.hp = 100;
         if(this.character !== "robot"){
             this.img = new Image();
             this.img.src = this.photo;
         }
         if(this.character === "me"){
-            this.fireball_coldtime = 2;
+            this.fireball_coldtime = 0.01;
+            this.fireball_real_coldtime = 0.01;
             this.fireball_img = new Image();
             this.fireball_img.src= "https://cdn.acwing.com/media/article/image/2021/12/02/1_9340c86053-fireball.png";
 
             this.blink_coldtime = 4;
+            this.blink_real_coldtime = 4;
             this.blink_img = new Image();
             this.blink_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_daccabdc53-blink.png";
         }
@@ -42,7 +45,7 @@ class Player extends MyGameObject{
         this.playground.notice_board.write("已就绪:"+this.playground.player_count+"人");
         if(this.playground.player_count>=3){
             this.playground.state = "fighting";
-            this.playground.notice_board.write("Fighting");
+            this.playground.notice_board.write("Fighting" + "("+ this.playground.players.length + "/" + this.playground.player_count + ")");
         }
         this.add_listening_events();
         if(this.character === "robot"){
@@ -76,7 +79,7 @@ class Player extends MyGameObject{
                         tx += outer.playground.cx;
                         ty += outer.playground.cy;
                         let fireball=outer.shoot_fireball(tx,ty);
-                        outer.fireball_coldtime= 0.01;
+                        outer.fireball_coldtime= outer.fireball_real_coldtime;
                         outer.cur_skill = null;
                         if(outer.playground.mode === "multi mode"){
                             outer.playground.mps.send_shoot_fireball(tx,ty,fireball.uuid);
@@ -86,7 +89,7 @@ class Player extends MyGameObject{
                         ty += outer.playground.cy;
                         outer.blink(tx,ty);
                         outer.cur_skill = null;
-                        outer.blink_coldtime = 4;
+                        outer.blink_coldtime = outer.blink_real_coldtime;
                         if(outer.playground.mode === "multi mode"){
                             outer.playground.mps.send_blink(tx,ty);
                         }
@@ -153,7 +156,7 @@ class Player extends MyGameObject{
         let angle = Math.atan2(ty-this.y, tx-this.x);
         let vx=Math.cos(angle);
         let vy=Math.sin(angle);
-        let fireball = new FireBall(this.playground, this, this.x, this.y, this.playground.height*0.01/this.playground.scale,vx,vy,this.playground.height*0.5/this.playground.scale,this.playground.height/this.playground.scale,"orange",this.playground.height*0.01/this.playground.scale);
+        let fireball = new FireBall(this.playground, this, this.x, this.y, this.playground.height*0.01/this.playground.scale,vx,vy,this.playground.height*0.5/this.playground.scale,this.playground.height/this.playground.scale,"orange",10);
         this.fireballs.push(fireball);
         return fireball;
     }
@@ -182,14 +185,15 @@ class Player extends MyGameObject{
             let move_length = this.radius * Math.random() * 6;
             new Particle(this.playground, this, x, y, vx, vy, radius, color, speed ,move_length);
         }
-        this.radius -= damage;
-        if(this.radius < this.eps){
+        // this.radius -= damage;
+        this.hp -= damage;
+        if(this.hp < this.eps){
             this.destroy();
             return false;
         }
         this.damage_vx=Math.cos(angle);
         this.damage_vy=Math.sin(angle);
-        this.damage_speed = damage*100;
+        this.damage_speed = this.playground.height  / this.playground.scale;
     }
 
     destroy_fireball(uuid){
@@ -232,7 +236,12 @@ class Player extends MyGameObject{
             this.update_skill_coldtime();
         }
         this.update_map_view();
+        this.update_notice_board();
         this.render();
+    }
+
+    update_notice_board(){
+        if(this.playground.state === "fighting")this.playground.notice_board.write("Fighting" + "("+ this.playground.players.length + "/" + this.playground.player_count + ")");
     }
 
     update_win(){
@@ -243,7 +252,6 @@ class Player extends MyGameObject{
     }
 
     update_map_view(){
-        if(this.username === "admin") console.log(this.x, this.y);
         if(this.character === "me"){
             this.playground.cx = this.x - this.playground.width / 2 / this.playground.scale;
             this.playground.cy = this.y - 0.5;
@@ -297,16 +305,37 @@ class Player extends MyGameObject{
             this.ctx.restore();
         }
         else{
+            this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc((this.x - this.playground.cx )*this.playground.scale,(this.y - this.playground.cy )*this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
             this.ctx.fillStyle=this.color;
             this.ctx.fill();
+            this.ctx.restore();
         }
 
         if(this.character === "me" && this.playground.state === "fighting"){
             this.render_skill_coldtime();
         }
+
+        this.render_blood();
     }
+
+    render_blood(){
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.lineWidth = 0.007 * this.playground.scale;
+        this.ctx.strokeStyle = "green";
+        if(this.hp < 50)this.ctx.strokeStyle = "red";
+        if (this.hp === 100){
+            this.ctx.arc((this.x - this.playground.cx) * this.playground.scale, (this.y - this.playground.cy) * this.playground.scale , this.radius * 1.4 * this.playground.scale, 0, Math.PI * 2 * (this.hp / 100), false);
+        }
+        else{
+            this.ctx.arc((this.x - this.playground.cx) * this.playground.scale, (this.y - this.playground.cy) * this.playground.scale , this.radius * 1.4 * this.playground.scale, 0 - Math.PI / 2 , Math.PI * 2 * (1 - this.hp / 100) - Math.PI /2, true);
+        }
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+
     render_skill_coldtime(){
         let x=1.5,y=0.9,r=0.04;
         this.ctx.save();
@@ -320,7 +349,7 @@ class Player extends MyGameObject{
         if(this.fireball_coldtime > this.eps){
             this.ctx.beginPath();
             this.ctx.moveTo(x*this.playground.scale,y*this.playground.scale);
-            this.ctx.arc(x*this.playground.scale,y*this.playground.scale,r*this.playground.scale,0-Math.PI/2,Math.PI *2*(1-this.fireball_coldtime/2 )-Math.PI/2,true);
+            this.ctx.arc(x*this.playground.scale,y*this.playground.scale,r*this.playground.scale,0-Math.PI/2,Math.PI *2*(1-this.fireball_coldtime/ this.fireball_real_coldtime )-Math.PI/2,true);
             this.ctx.lineTo(x*this.playground.scale,y*this.playground.scale);
             this.ctx.fillStyle="rgba(0,0,255,0.6)";
             this.ctx.fill();
@@ -338,7 +367,7 @@ class Player extends MyGameObject{
         if(this.blink_coldtime > this.eps){
             this.ctx.beginPath();
             this.ctx.moveTo(x*this.playground.scale,y*this.playground.scale);
-            this.ctx.arc(x*this.playground.scale,y*this.playground.scale,r*this.playground.scale,0-Math.PI/2,Math.PI *2*(1-this.blink_coldtime/4 )-Math.PI/2,true);
+            this.ctx.arc(x*this.playground.scale,y*this.playground.scale,r*this.playground.scale,0-Math.PI/2,Math.PI *2*(1-this.blink_coldtime/this.blink_real_coldtime )-Math.PI/2,true);
             this.ctx.lineTo(x*this.playground.scale,y*this.playground.scale);
             this.ctx.fillStyle="rgba(0,0,255,0.6)";
             this.ctx.fill();

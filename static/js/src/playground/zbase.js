@@ -7,6 +7,7 @@ class MyGamePlayground{
         this.chat_state = 0;
         this.cx = 0;
         this.cy = 0;
+        this.robot_number = 15;
         this.start();
     }
     create_uuid(){
@@ -43,11 +44,13 @@ class MyGamePlayground{
         this.width = unit*16;
         this.height = unit*9;
         this.scale = this.height;
-        this.virtual_width = this.width / this.scale * 3;
-        this.virtual_height = 3;
+        this.p = 3;
+        this.virtual_width = this.width / this.scale * this.p;
+        this.virtual_height = this.p;
         this.cx = this.virtual_width / 2 - this.width / 2 / this.scale;
         this.cy = this.virtual_height / 2 - this.height / 2 / this.scale;
         if(this.game_map)this.game_map.resize();
+        if(this.mini_map)this.mini_map.resize();
     }
     show(mode){
         this.$playground.show();
@@ -64,7 +67,7 @@ class MyGamePlayground{
         this.mode=mode;
         this.players.push(new Player(this,this.virtual_width / 2,this.virtual_height / 2,this.height*0.05/this.scale,"white",this.height*0.15/this.scale,"me",this.root.settings.username,this.root.settings.photo));
         if(mode === "single mode"){
-            for(let i=0;i<15;i++){
+            for(let i=0;i< this.robot_number ;i++){
                 this.players.push(new Player(this,this.virtual_width * Math.random(),this.virtual_height * Math.random() ,this.height*0.05/this.scale,this.get_random_color(),this.height*0.15/this.scale,"robot"));
             }
         }else{
@@ -79,6 +82,7 @@ class MyGamePlayground{
                 });
             };
         }
+        this.mini_map = new Mini_Map(this);
     }
     hide(){
         while (this.players && this.players.length > 0) {
@@ -102,6 +106,10 @@ class MyGamePlayground{
         if(this.grid){
             this.grid.destroy();
             this.grid = null;
+        }
+        if(this.mini_map){
+            this.mini_map.destroy();
+            this.mini_map = null;
         }
         this.$playground.empty();
 

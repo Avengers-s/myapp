@@ -105,7 +105,7 @@ class MultiPlayer(AsyncWebsocketConsumer):
         remain_cnt =0
         for player in players:
             if player['uuid'] == data['attackee_uuid']:
-                player['hp']-=25
+                player['hp']-=10
             if player['hp'] > 0:
                 remain_cnt += 1
 
