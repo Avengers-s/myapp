@@ -2,7 +2,7 @@ class Game_Map extends MyGameObject{
     constructor(playground){
         super();
         this.playground = playground;
-        this.$canvas = $(`<canvas tabindex=0></canvas>`);
+        this.$canvas = $(`<canvas tabindex=0 class="playground_canvas"></canvas>`);
         this.ctx = this.$canvas[0].getContext('2d');
         this.ctx.canvas.width = this.playground.width;
         this.ctx.canvas.height = this.playground.height;

@@ -54,7 +54,6 @@ class MyGamePlayground{
     }
     show(mode){
         this.$playground.show();
-        this.resize();
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.bgm = new Audio(this);
@@ -114,10 +113,6 @@ class MyGamePlayground{
         if(this.mini_map){
             this.mini_map.destroy();
             this.mini_map = null;
-        }
-        if(this.ring){
-            this.ring.destroy();
-            this.ring = null;
         }
         this.$playground.empty();
 

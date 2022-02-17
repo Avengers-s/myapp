@@ -145,7 +145,7 @@
     user-select: none;
     background-color: rgb(20,20,20,0.9);
 }
-.my_game_playground > canvas{
+.playground_canvas{
     position: relative;
     top: 50%;
     left: 50%;

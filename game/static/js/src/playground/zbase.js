@@ -54,6 +54,7 @@ class MyGamePlayground{
     }
     show(mode){
         this.$playground.show();
+        this.resize();
         this.width = this.$playground.width();
         this.height = this.$playground.height();
         this.bgm = new Audio(this);
@@ -61,6 +62,7 @@ class MyGamePlayground{
         this.grid = new Grid(this);
         this.notice_board = new NoticeBoard(this);
         this.score_board = new ScoreBoard(this);
+        this.ring = new Ring(this);
         this.player_count = 0;
         this.state = "waiting"; //waiting -> fighting -> over
         this.resize();
@@ -84,6 +86,7 @@ class MyGamePlayground{
             };
         }
         this.mini_map = new Mini_Map(this);
+        this.resize();
     }
     hide(){
         while (this.players && this.players.length > 0) {
@@ -111,6 +114,10 @@ class MyGamePlayground{
         if(this.mini_map){
             this.mini_map.destroy();
             this.mini_map = null;
+        }
+        if(this.ring){
+            this.ring.destroy();
+            this.ring = null;
         }
         this.$playground.empty();
 
