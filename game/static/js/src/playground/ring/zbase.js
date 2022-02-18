@@ -13,10 +13,10 @@ class Ring extends MyGameObject{
         this.eps = 0.01;
         this.speed = 1 / 20 * this.max_radius;
         this.big_ring_state = "waiting";
-        this.coldtime = 2;
-        this.real_coldtime = 2;
-        this.big_coldtime = 4;
-        this.big_real_coldtime = 4;
+        this.coldtime = 10;
+        this.real_coldtime = 10;
+        this.big_coldtime = 15;
+        this.big_real_coldtime = 15;
         this.last_flag = -1;
     }
     start(){

@@ -301,11 +301,16 @@ class Player extends MyGameObject{
     }
     update(){
         this.spent_time+=this.timedelta/1000;
-        if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1.0/100){
+        if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1.0/300){
             let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];
             let tx = player.x+player.vx*player.speed*0.2;
             let ty = player.y+player.vy*player.speed*0.2;
             this.shoot_fireball(tx,ty);
+        }else if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1/400){
+            let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];
+            let tx = player.x+player.vx*player.speed*0.2;
+            let ty = player.y+player.vy*player.speed*0.2;
+            this.shoot_iceball(tx,ty);
         }
         this.update_win();
         this.update_move();
@@ -398,7 +403,8 @@ class Player extends MyGameObject{
                     this.vx=this.vy=0;
                     this.move_length=0;
                 }else{
-                    this.move_to(this.playground.virtual_width * Math.random(),this.playground.virtual_height * Math.random());
+                    if(Math.random() < 1/10 || this.playground.ring.radius < this.eps)this.move_to(this.playground.virtual_width * Math.random(),this.playground.virtual_height * Math.random());
+                    else this.move_to(Math.min(this.playground.virtual_width,this.playground.ring.mini_x +( Math.random() * 2 -1)*this.playground.ring.mini_radius), Math.min(this.playground.virtual_height,this.playground.ring.mini_y+(Math.random()* 2 -1)*this.playground.ring.mini_radius));
                 }
             }
         }
