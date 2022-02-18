@@ -179,6 +179,62 @@ class MultiPlayer(AsyncWebsocketConsumer):
                 }
         );
 
+    async def sync_ring(self,data):
+        if not cache.keys("*-%s-*-*" % (self.uuid)):
+            return False
+        await self.channel_layer.group_send(
+                self.room_name,
+                {
+                    'type': "group_send_event",
+                    'event': "sync_ring",
+                    'uuid': data['uuid'],
+                    'mini_radius': data['mini_radius'],
+                    'mini_x': data['mini_x'],
+                    'mini_y': data['mini_y'],
+                    'coldtime': data['coldtime'],
+                    'big_coldtime':data['big_coldtime'],
+                    'big_ring_state': data['big_ring_state'],
+                }
+        );
+
+    async def is_in_ring(self,data):
+        if not self.room_name:
+            return 
+        players = cache.get(self.room_name)
+
+        if not players:
+            return 
+        
+        remain_cnt = 0
+        for player in players:
+            if player['uuid'] == data['uuid']:
+                player['hp']-=5
+            if player['hp'] > 0:
+                remain_cnt += 1
+
+        if remain_cnt > 1:
+            cache.set(self.room_name, players, 3600)
+        else:
+            def db_update_player_score(username, score):
+                player = Player.objects.get(user__username =username)
+                player.score +=score
+                player.save()
+            for player in players:
+                if player['hp'] <= 0 :
+                    await database_sync_to_async(db_update_player_score)(player['username'],-5)
+                else:
+                    await database_sync_to_async(db_update_player_score)(player['username'],10)
+            cache.delete(self.room_name)
+
+
+        await self.channel_layer.group_send(
+                self.room_name,
+                {
+                    'type':"group_send_event",
+                    'event':"is_in_ring",
+                    'uuid': data['uuid'],
+                }
+        );
     async def receive(self, text_data):
         data = json.loads(text_data)
         if data['event'] == "create_player":
@@ -197,3 +253,7 @@ class MultiPlayer(AsyncWebsocketConsumer):
             await self.remove_player(data)
         elif data['event'] == "shoot_iceball":
             await self.shoot_iceball(data)
+        elif data['event'] == "sync_ring":
+            await self.sync_ring(data)
+        elif data['event'] == "is_in_ring":
+            await self.is_in_ring(data)

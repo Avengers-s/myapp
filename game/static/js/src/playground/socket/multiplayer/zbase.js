@@ -31,6 +31,10 @@ class MultiPlayerSocket{
                 outer.receive_message(uuid,data.username,data.text);
             }else if(event === "shoot_iceball"){
                 outer.receive_shoot_iceball(uuid,data.tx,data.ty,data.ball_uuid);
+            }else if(event === "sync_ring"){
+                outer.receive_sync_ring(uuid, data.mini_radius,data.mini_x,data.mini_y,data.coldtime,data.big_coldtime,data.big_ring_state);
+            }else if(event === "is_in_ring"){
+                outer.receive_is_in_ring(uuid);
             }
         }
     }
@@ -47,6 +51,18 @@ class MultiPlayerSocket{
     receive_message(uuid,username,text){
         this.playground.chat_field.add_message(username,text);
     }
+
+    receive_is_in_ring(uuid){
+        let player = this.get_player(uuid);
+        if(player){
+            player.hp -= 5;
+            if(player.hp <= 0){
+                player.destroy();
+                return false;
+            }
+        }
+    }
+
     receive_create_player(uuid,username,photo){
         let player = new Player(
             this.playground,
@@ -61,6 +77,37 @@ class MultiPlayerSocket{
         );
         player.uuid = uuid;
         this.playground.players.push(player);
+    }
+
+    receive_sync_ring(uuid,mini_radius,mini_x,mini_y,coldtime,big_coldtime,big_ring_state){
+        this.playground.ring.mini_radius = mini_radius;
+        this.playground.ring.mini_x = mini_x;
+        this.playground.ring.mini_y = mini_y;
+        this.playground.ring.coldtime = coldtime;
+        this.playground.ring.big_coldtime = big_coldtime;
+        this.playground.big_ring_state = big_ring_state;
+    }
+
+    send_sync_ring(mini_radius,mini_x,mini_y,coldtime,big_coldtime,big_ring_state){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "sync_ring",
+            'uuid': outer.uuid,
+            'mini_radius': mini_radius,
+            'mini_x': mini_x,
+            'mini_y': mini_y,
+            'coldtime': coldtime,
+            'big_coldtime': big_coldtime,
+            'big_ring_state': big_ring_state,
+        }));
+    }
+
+    send_is_in_ring(){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "is_in_ring",
+            'uuid': outer.uuid,
+        }));
     }
     send_create_player(username,photo){
         let outer = this;

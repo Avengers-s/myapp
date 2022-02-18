@@ -17,9 +17,11 @@ class Ring extends MyGameObject{
         this.real_coldtime = 2;
         this.big_coldtime = 4;
         this.big_real_coldtime = 4;
+        this.last_flag = -1;
     }
     start(){
-
+        //send(this.mini_radius,mini_x,mini_y)
+        
     }
     get_dist(x1,y1,x2,y2){
         let x= x2 - x1;
@@ -27,6 +29,11 @@ class Ring extends MyGameObject{
         return Math.sqrt(x*x + y*y);
     }
     update(){
+        if(this.last_flag !== this.mini_radius && this.playground.mode === "multi mode" && this.playground.state === "fighting"){
+            this.playground.mps.send_sync_ring(this.mini_radius,this.mini_x,this.mini_y,this.coldtime,this.big_coldtime,this.big_ring_state);
+            this.last_flag = this.mini_radius;
+        }
+        if(this.playground.state !== "fighting") return false;
         this.update_coldtime();
         this.update_big_ring();
         this.update_small_ring();
@@ -36,7 +43,7 @@ class Ring extends MyGameObject{
     update_coldtime(){
         this.coldtime -= this.timedelta / 1000;
         this.coldtime = Math.max(this.coldtime , 0);
-        this.big_coldtime -= this.timedelta /1000;
+        if(this.coldtime < this.eps)this.big_coldtime -= this.timedelta /1000;
         this.big_coldtime = Math.max(this.big_coldtime,0);
     }
 
@@ -60,6 +67,7 @@ class Ring extends MyGameObject{
                     if(this.mini_radius < this.max_radius * 1/10)this.mini_radius =0;
                     this.mini_x += (Math.random() * 2 - 1) * (this.radius - this.mini_radius);
                     this.mini_y += (Math.random() * 2 - 1) * (this.radius - this.mini_radius);
+                    //send(mini_radius,mini_x,mini_y);
                     return false;
                 }
                 let angle = Math.atan2(this.mini_y - this.y , this.mini_x  - this.x);

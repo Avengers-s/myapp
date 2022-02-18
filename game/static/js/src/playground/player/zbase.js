@@ -25,6 +25,9 @@ class Player extends MyGameObject{
         this.fireballs = [];
         this.hp = 100;
         this.iceballs = [];
+        this.in_ring_state = false;
+        this.in_ring_time = 1;
+        this.real_in_ring_time = 1;
         if(this.character !== "robot"){
             this.img = new Image();
             this.img.src = this.photo;
@@ -311,10 +314,34 @@ class Player extends MyGameObject{
         }
         this.update_debuff();
         this.update_map_view();
+        if(this.character !== "enemy")this.update_ring();
         this.update_notice_board();
         this.render();
     }
 
+    update_ring(){
+        if(this.playground.ring.radius < this.eps || this.get_dist(this.x,this.y,this.playground.ring.x,this.playground.ring.y) > this.playground.ring.radius){
+            this.in_ring_state = true;
+        }else{
+            this.in_ring_state = false;
+            this.in_ring_time = this.real_in_ring_time;
+        }
+
+        if(this.in_ring_state){
+            this.in_ring_time -= this.timedelta / 1000;
+            this.in_ring_time = Math.max(0,this.in_ring_time);
+        }
+
+        if(this.in_ring_time < this.eps){
+            this.in_ring_time = this.real_in_ring_time;
+            this.hp -= 5;
+            if(this.playground.mode === "multi mode" && this.playground.state === "fighting")this.playground.mps.send_is_in_ring();
+            if(this.hp < this.eps){
+                this.destroy();
+                return false;
+            }
+        }
+    }
     update_notice_board(){
         if(this.playground.state === "fighting")this.playground.notice_board.write("Fighting" + "("+ this.playground.players.length + "/" + this.playground.player_count + ")");
     }

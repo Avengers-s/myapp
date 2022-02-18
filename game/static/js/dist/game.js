@@ -367,6 +367,9 @@ class NoticeBoard extends MyGameObject{
         this.playground = playground;
         this.ctx = this.playground.game_map.ctx;
         this.text="已就绪:0人";
+        this.ring_state = "距离安全区刷新还有:0秒";
+        this.eps = 0.01;
+        this.ring_state_code = 0;
     }
     start(){
 
@@ -375,13 +378,54 @@ class NoticeBoard extends MyGameObject{
         this.text = text;
     }
     update(){
+        this.update_ring_state();
         this.render();
     }
+
+    update_ring_state(){
+        if(this.playground.state !== "fighting") return false;
+        if(this.playground.ring.radius < this.eps){
+            this.ring_state = "安全区已消失...";
+            return false;
+        }
+        if(this.playground.ring.big_ring_state === "reducing"){
+            this.ring_state = "毒圈正在缩小...";
+            this.ring_state_code = 0;
+            return false;
+        }
+        
+        if(this.ring_state_code === 0 && this.playground.ring.coldtime > this.eps){
+            if(this.playground.ring.mini_radius > this.eps)this.ring_state = "距离安全区刷新还有:" + Math.ceil(this.playground.ring.coldtime) + "秒";
+            else this.ring_state = "安全区已消失...";
+        }else{
+            if(this.ring_state_code === 0){
+                this.ring_state_code = 1;
+            }else{
+                if(this.playground.ring.big_coldtime > this.eps)this.ring_state = "距离毒圈缩小还有:" + Math.floor(this.playground.ring.big_coldtime) + "秒";
+                else this.ring_state_code = 0;
+            }
+        }
+    }
+
     render(){
+        this.render_text();
+        if(this.playground.state === "fighting")this.render_ring_text();
+    }
+    render_text(){
+        this.ctx.save();
         this.ctx.font = "20px serif";
         this.ctx.fillStyle = "white";
         this.ctx.textAlign = "center";
-        this.ctx.fillText(this.text, this.playground.width/2, 20);
+        this.ctx.fillText(this.text, this.playground.width/2, 20); 
+        this.ctx.restore();
+    }
+    render_ring_text(){
+        this.ctx.save();
+        this.ctx.font = "20px serif";
+        this.ctx.fillStyle = "white";
+        this.ctx.textAlign = "center";
+        this.ctx.fillText(this.ring_state, this.playground.width/2 , 50);
+        this.ctx.restore();
     }
 }
 class Particle extends MyGameObject{
@@ -451,6 +495,9 @@ class Player extends MyGameObject{
         this.fireballs = [];
         this.hp = 100;
         this.iceballs = [];
+        this.in_ring_state = false;
+        this.in_ring_time = 1;
+        this.real_in_ring_time = 1;
         if(this.character !== "robot"){
             this.img = new Image();
             this.img.src = this.photo;
@@ -737,10 +784,34 @@ class Player extends MyGameObject{
         }
         this.update_debuff();
         this.update_map_view();
+        if(this.character !== "enemy")this.update_ring();
         this.update_notice_board();
         this.render();
     }
 
+    update_ring(){
+        if(this.playground.ring.radius < this.eps || this.get_dist(this.x,this.y,this.playground.ring.x,this.playground.ring.y) > this.playground.ring.radius){
+            this.in_ring_state = true;
+        }else{
+            this.in_ring_state = false;
+            this.in_ring_time = this.real_in_ring_time;
+        }
+
+        if(this.in_ring_state){
+            this.in_ring_time -= this.timedelta / 1000;
+            this.in_ring_time = Math.max(0,this.in_ring_time);
+        }
+
+        if(this.in_ring_time < this.eps){
+            this.in_ring_time = this.real_in_ring_time;
+            this.hp -= 5;
+            if(this.playground.mode === "multi mode" && this.playground.state === "fighting")this.playground.mps.send_is_in_ring();
+            if(this.hp < this.eps){
+                this.destroy();
+                return false;
+            }
+        }
+    }
     update_notice_board(){
         if(this.playground.state === "fighting")this.playground.notice_board.write("Fighting" + "("+ this.playground.players.length + "/" + this.playground.player_count + ")");
     }
@@ -930,9 +1001,11 @@ class Ring extends MyGameObject{
         this.real_coldtime = 2;
         this.big_coldtime = 4;
         this.big_real_coldtime = 4;
+        this.last_flag = -1;
     }
     start(){
-
+        //send(this.mini_radius,mini_x,mini_y)
+        
     }
     get_dist(x1,y1,x2,y2){
         let x= x2 - x1;
@@ -940,6 +1013,11 @@ class Ring extends MyGameObject{
         return Math.sqrt(x*x + y*y);
     }
     update(){
+        if(this.last_flag !== this.mini_radius && this.playground.mode === "multi mode" && this.playground.state === "fighting"){
+            this.playground.mps.send_sync_ring(this.mini_radius,this.mini_x,this.mini_y,this.coldtime,this.big_coldtime,this.big_ring_state);
+            this.last_flag = this.mini_radius;
+        }
+        if(this.playground.state !== "fighting") return false;
         this.update_coldtime();
         this.update_big_ring();
         this.update_small_ring();
@@ -949,7 +1027,7 @@ class Ring extends MyGameObject{
     update_coldtime(){
         this.coldtime -= this.timedelta / 1000;
         this.coldtime = Math.max(this.coldtime , 0);
-        this.big_coldtime -= this.timedelta /1000;
+        if(this.coldtime < this.eps)this.big_coldtime -= this.timedelta /1000;
         this.big_coldtime = Math.max(this.big_coldtime,0);
     }
 
@@ -973,6 +1051,7 @@ class Ring extends MyGameObject{
                     if(this.mini_radius < this.max_radius * 1/10)this.mini_radius =0;
                     this.mini_x += (Math.random() * 2 - 1) * (this.radius - this.mini_radius);
                     this.mini_y += (Math.random() * 2 - 1) * (this.radius - this.mini_radius);
+                    //send(mini_radius,mini_x,mini_y);
                     return false;
                 }
                 let angle = Math.atan2(this.mini_y - this.y , this.mini_x  - this.x);
@@ -1280,6 +1359,10 @@ class MultiPlayerSocket{
                 outer.receive_message(uuid,data.username,data.text);
             }else if(event === "shoot_iceball"){
                 outer.receive_shoot_iceball(uuid,data.tx,data.ty,data.ball_uuid);
+            }else if(event === "sync_ring"){
+                outer.receive_sync_ring(uuid, data.mini_radius,data.mini_x,data.mini_y,data.coldtime,data.big_coldtime,data.big_ring_state);
+            }else if(event === "is_in_ring"){
+                outer.receive_is_in_ring(uuid);
             }
         }
     }
@@ -1296,6 +1379,18 @@ class MultiPlayerSocket{
     receive_message(uuid,username,text){
         this.playground.chat_field.add_message(username,text);
     }
+
+    receive_is_in_ring(uuid){
+        let player = this.get_player(uuid);
+        if(player){
+            player.hp -= 5;
+            if(player.hp <= 0){
+                player.destroy();
+                return false;
+            }
+        }
+    }
+
     receive_create_player(uuid,username,photo){
         let player = new Player(
             this.playground,
@@ -1310,6 +1405,37 @@ class MultiPlayerSocket{
         );
         player.uuid = uuid;
         this.playground.players.push(player);
+    }
+
+    receive_sync_ring(uuid,mini_radius,mini_x,mini_y,coldtime,big_coldtime,big_ring_state){
+        this.playground.ring.mini_radius = mini_radius;
+        this.playground.ring.mini_x = mini_x;
+        this.playground.ring.mini_y = mini_y;
+        this.playground.ring.coldtime = coldtime;
+        this.playground.ring.big_coldtime = big_coldtime;
+        this.playground.big_ring_state = big_ring_state;
+    }
+
+    send_sync_ring(mini_radius,mini_x,mini_y,coldtime,big_coldtime,big_ring_state){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "sync_ring",
+            'uuid': outer.uuid,
+            'mini_radius': mini_radius,
+            'mini_x': mini_x,
+            'mini_y': mini_y,
+            'coldtime': coldtime,
+            'big_coldtime': big_coldtime,
+            'big_ring_state': big_ring_state,
+        }));
+    }
+
+    send_is_in_ring(){
+        let outer = this;
+        this.ws.send(JSON.stringify({
+            'event': "is_in_ring",
+            'uuid': outer.uuid,
+        }));
     }
     send_create_player(username,photo){
         let outer = this;
