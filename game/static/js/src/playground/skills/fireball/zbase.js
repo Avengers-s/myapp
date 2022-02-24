@@ -76,9 +76,11 @@ class FireBall extends MyGameObject{
         }
     }
     render(){
+        this.ctx.save();
         this.ctx.beginPath();
         this.ctx.arc((this.x - this.playground.cx)*this.playground.scale,(this.y - this.playground.cy) * this.playground.scale,this.radius*this.playground.scale,0,Math.PI *2,false);
         this.ctx.fillStyle=this.color;
         this.ctx.fill();
+        this.ctx.restore();
     }
 }

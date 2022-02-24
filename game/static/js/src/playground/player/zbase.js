@@ -66,6 +66,9 @@ class Player extends MyGameObject{
         this.playground.game_map.$canvas.on("contextmenu",function(){
             return false;
         });
+        this.playground.mini_map.$canvas.on("contextmenu",function(){
+            return false;
+        });
         if(this.character === "me"){
             this.playground.game_map.$canvas.mousedown(function(e){
                 if(outer.playground.state!=="fighting"){
@@ -241,6 +244,7 @@ class Player extends MyGameObject{
 
     }
     is_attack_fireball(angle,damage){
+        if(this.playground.mode === "single mode")new Effects(this.playground,this);
         for(let i=0;i<20+Math.random()*15;i++){
             let x=this.x,y=this.y;
             let radius = this.radius*Math.random()*0.13;
