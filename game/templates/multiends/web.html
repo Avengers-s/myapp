@@ -3,14 +3,14 @@
 <head>
     <link rel="stylesheet" href="https://cdn.acwing.com/static/jquery-ui-dist/jquery-ui.min.css">
     <script src="https://cdn.acwing.com/static/jquery/js/jquery-3.3.1.min.js"></script>
-    <link rel="stylesheet" href="{% static 'css/game.css' %}">
+    <link rel="stylesheet" href="{% static 'css/game-1.0.css' %}">
     <link rel="icon" href="https://cdn.acwing.com/media/article/image/2021/12/17/1_be4c11ce5f-acapp.png">
 </head>
 
 <body style="margin: 0">
     <div id="my_game_12345678">
         <script type="module">
-            import {MyGame} from "{% static 'js/dist/game.js' %}";
+            import {MyGame} from "{% static 'js/dist/game-1.0.js' %}";
             $(document).ready(function(){
                 let my_game = new MyGame("my_game_12345678");
             });
