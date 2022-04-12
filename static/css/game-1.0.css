@@ -129,6 +129,7 @@
     left:20%;
 }
 .my_game_rank_field{
+    overflow:scroll;
     width: 75%;
     height: 80%;
     border-radius: 5px;
