@@ -1,0 +1,6 @@
+--2022-04-12 22:47:35--  https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fi0.hdslb.com%2Fbfs%2Farticle%2F07ed53276cd4393dfa4220e7d691c40bdd7e8597.jpg
+Resolving gimg2.baidu.com (gimg2.baidu.com)... 112.65.203.36, 2408:870c:1020:1::7041:cb24
+Connecting to gimg2.baidu.com (gimg2.baidu.com)|112.65.203.36|:443... connected.
+HTTP request sent, awaiting response... 400 Bad Request
+2022-04-12 22:47:35 ERROR 400: Bad Request.
+

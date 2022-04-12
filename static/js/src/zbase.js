@@ -6,6 +6,7 @@ export class MyGame{
         this.settings =new Settings(this);
         this.menu = new MyGameMenu(this);
         this.playground = new MyGamePlayground(this);
+        this.rank = new MyGameRank(this);
         this.start();
     }
     start(){

@@ -12,6 +12,10 @@ class MyGameMenu{
                         多人模式
                     </div>
                     <br>
+                    <div class="my_game_menu_field_item my_game_menu_field_item_rank">
+                        排行榜
+                    </div>
+                    <br>
                     <div class="my_game_menu_field_item my_game_menu_field_item_settings_mod">
                         退出
                     </div>
@@ -23,6 +27,7 @@ class MyGameMenu{
         this.$single_mod = this.$menu.find(".my_game_menu_field_item_single_mod");
         this.$multi_mod = this.$menu.find(".my_game_menu_field_item_multi_mod");
         this.$settings_mod = this.$menu.find(".my_game_menu_field_item_settings_mod");
+        this.$rank = this.$menu.find(".my_game_menu_field_item_rank");
         this.start();
     }
     start(){
@@ -40,6 +45,10 @@ class MyGameMenu{
         });
         this.$settings_mod.click(function(){
             outer.root.settings.logout_on_remote();
+        });
+        this.$rank.click(function(){
+            outer.hide();
+            outer.root.rank.show();
         });
     }
     hide(){

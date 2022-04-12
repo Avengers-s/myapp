@@ -5,6 +5,14 @@
     background-size: 100% 100%;
     user-select: none;
 }
+.my_game_rank{
+    background-image: url("/static/image/rank/bg.jpg");
+    background-size: 100% 100%;
+    user-select: none;
+    width: 100%;
+    height: 100%;
+
+}
 .my_game_settings{
     background-image: url("/static/image/menu/background.jpg");
     width: 100%;
@@ -117,15 +125,32 @@
 .my_game_menu_field{
     width:20vw;
     position:relative;
-    top:40%;
+    top:30%;
     left:20%;
+}
+.my_game_rank_field{
+    width: 75%;
+    height: 80%;
+    border-radius: 5px;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: rgba(240,240,240,0.7);
+}
+
+.my_game_rank_field_item_table th,td{
+    height:40%;
+    width:50%;
+    font-size:100%;
+    text-align:center;
 }
 
 .my_game_menu_field_item{
-    height:6vh;
-    width:18vw;
+    height:5vh;
+    width:16vw;
     color:white;
-    font-size:4vh;
+    font-size:3vh;
     font-style:italic;
     text-align:center;
     background-color:rgba(39,21,28,0.6);
