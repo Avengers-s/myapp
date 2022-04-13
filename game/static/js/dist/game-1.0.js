@@ -3,11 +3,12 @@ class MyGameRank{
         this.root = root;
         this.$rank = $(`
             <div class="my_game_rank">
+                
                 <div class="my_game_rank_field">
                     <div class="my_game_rank_field_item my_game_rank_field_item_return">
                         返回
                     </div>
-                    <table class="my_game_rank_field_item my_game_rank_field_item_table" border=1>
+                    <table class="my_game_rank_field_item my_game_rank_field_item_table table table-hover table-bordered" border=1>
                         <tr>
                             <th>排名</th>
                             <th>用户名</th>
@@ -21,6 +22,7 @@ class MyGameRank{
                             </tr>
                         </tbody>
                     </table>
+                    
                     <br>
                     
                 </div>
@@ -48,18 +50,25 @@ class MyGameRank{
         this.$rank.hide();
     }
 
-    show(){
+    show(page){
         this.$table_content.empty();
         let outer = this;
+        let page_num = 5;
+        let l = page_num * (page - 1) + 1;
+        let r = l + page_num - 1;
         $.ajax({
             url: "https://app1281.acapp.acwing.com.cn/rank/get_rank",
             type: "GET",
+            data:{
+                l: l,
+                r: r,
+            },
             success:function(resp){
                 if(resp.result==="success"){
                     let players = resp.rank_list;
                     for(let i=0;i<players.length;i++){
                         let player = players[i];
-                        let obj = "<tr><td>"+(i+1)+"</td><td>"+player.username+"</td><td>"+player.score+"</td></tr>";
+                        let obj = "<tr><td>"+(l+i)+"</td><td>"+player.username+"</td><td>"+player.score+"</td></tr>";
                         outer.$table_content.append(obj);
                     }
                 }
@@ -118,7 +127,7 @@ class MyGameMenu{
         });
         this.$rank.click(function(){
             outer.hide();
-            outer.root.rank.show();
+            outer.root.rank.show(1);
         });
     }
     hide(){
@@ -1246,6 +1255,19 @@ class ScoreBoard extends MyGameObject{
     win(){
         this.state = "win";
         let outer = this;
+        $.ajax({
+            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            type: "GET",
+            data: {
+                username: outer.playground.root.settings.username,
+                score: "10",
+            },
+            success: function(resp){
+                if(resp.result==="successs"){
+
+                }
+            },
+        });
         setTimeout(function(){
             outer.add_listening_events();
         }, 1000);
@@ -1254,6 +1276,19 @@ class ScoreBoard extends MyGameObject{
     lose(){
         this.state = "lose";
         let outer = this;
+        $.ajax({
+            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            type: "GET",
+            data: {
+                username: outer.playground.root.settings.username,
+                score: "-5",
+            },
+            success: function(resp){
+                if(resp.result==="successs"){
+
+                }
+            },
+        });
         setTimeout(function(){
             outer.add_listening_events();
         },1000);

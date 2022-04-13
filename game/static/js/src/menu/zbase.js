@@ -48,7 +48,7 @@ class MyGameMenu{
         });
         this.$rank.click(function(){
             outer.hide();
-            outer.root.rank.show();
+            outer.root.rank.show(1);
         });
     }
     hide(){

@@ -29,6 +29,19 @@ class ScoreBoard extends MyGameObject{
     win(){
         this.state = "win";
         let outer = this;
+        $.ajax({
+            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            type: "GET",
+            data: {
+                username: outer.playground.root.settings.username,
+                score: "10",
+            },
+            success: function(resp){
+                if(resp.result==="successs"){
+
+                }
+            },
+        });
         setTimeout(function(){
             outer.add_listening_events();
         }, 1000);
@@ -37,6 +50,19 @@ class ScoreBoard extends MyGameObject{
     lose(){
         this.state = "lose";
         let outer = this;
+        $.ajax({
+            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            type: "GET",
+            data: {
+                username: outer.playground.root.settings.username,
+                score: "-5",
+            },
+            success: function(resp){
+                if(resp.result==="successs"){
+
+                }
+            },
+        });
         setTimeout(function(){
             outer.add_listening_events();
         },1000);

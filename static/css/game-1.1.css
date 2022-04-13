@@ -137,12 +137,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
-    background-color: rgba(240,240,240,0.7);
+    background-color: rgba(220,220,220,0.7);
 }
 
 .my_game_rank_field_item_table th,td{
-    height:40%;
-    width:50%;
     font-size:100%;
     text-align:center;
 }
