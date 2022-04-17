@@ -55,9 +55,47 @@ class Mini_Map extends MyGameObject{
         }
         this.ctx.restore();
         this.render_focus_player_effect();
+        this.render_add_blood();
         if(this.playground.ring.radius > this.eps)this.render_ring();
         if(this.playground.ring.mini_radius > this.eps) this.render_small_ring();
     }
+    get_pos_x(x){                                                                                                                                           
+        return x * this.playground.scale;
+    }
+
+    get_pos_y(y){
+        return y * this.playground.scale;
+    }
+
+    render_add_blood(){
+        for(let i=0;i<this.playground.players.length;i++){
+            let player = this.playground.players[i];
+            if(player.character === "me")
+            {
+                for(let j=0;j<player.add_blood_list.length;j++){
+                    let add_blood = player.add_blood_list[j];
+                    let x = add_blood.x / this.playground.p / this.p;
+                    let y = add_blood.y / this.playground.p / this.p;
+                    let len = this.playground.height * 0.04 / this.playground.scale / this.playground.p /this.p;
+                    this.ctx.save();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.get_pos_x(x),this.get_pos_y(y-len));
+                    this.ctx.lineTo(this.get_pos_x(x),this.get_pos_y(y+len));
+                    this.ctx.lineWidth = 8;
+                    this.ctx.strokeStyle = "green";
+                    this.ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.get_pos_x(x-len),this.get_pos_y(y));
+                    this.ctx.lineTo(this.get_pos_x(x+len),this.get_pos_y(y));
+                    this.ctx.lineWidth = 8;
+                    this.ctx.strokeStyle = "green";
+                    this.ctx.stroke();
+                    this.ctx.restore();   
+                }
+            }
+        }
+    }
+
     render_focus_player_effect(){
         for(let i=0; i<this.playground.players.length; i++){
             let player = this.playground.players[i];

@@ -33,6 +33,8 @@ class Player extends MyGameObject{
             this.img.src = this.photo;
         }
         if(this.character === "me"){
+            this.tot_add_blood = 0;
+            this.add_blood_list = [];
             this.fireball_coldtime = 0.01;
             this.fireball_real_coldtime = 0.01;
             this.fireball_img = new Image();
@@ -303,7 +305,26 @@ class Player extends MyGameObject{
         this.vx = Math.cos(angle);
         this.vy = Math.sin(angle);
     }
+    update_add_blood(){
+        if(this.character === "me" && this.add_blood_list.length < 4 && Math.random()< 1.0/800){
+            let new_add_blood = new Add_Blood(this.playground, this.playground.virtual_width * Math.random(), this.playground.virtual_height * Math.random(), 10);
+            this.add_blood_list.push(new_add_blood);
+        }
+        if(this.character === "me"){
+            for(let j=0;j<this.add_blood_list.length;j++){
+                let li = this.add_blood_list[j];
+                console.log(li.x,li.y,this.x,this.y);
+                //console.log(this.get_dist(li.x,li.y,this.x,this.y));
+                if(this.get_dist(li.x,li.y,this.x,this.y) < this.radius){
+                    li.destroy();
+                    this.hp+=10;
+                    this.hp=Math.min(this.hp,100);
+                }
+            }
+        }
+    }
     update(){
+        this.update_add_blood();
         this.spent_time+=this.timedelta/1000;
         if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1.0/300){
             let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];

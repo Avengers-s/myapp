@@ -91,6 +91,10 @@ class MyGameMenu{
                         多人模式
                     </div>
                     <br>
+                    <div class="my_game_menu_field_item my_game_menu_field_item_alive_mod">
+                        生存模式
+                    </div>
+                    <br>
                     <div class="my_game_menu_field_item my_game_menu_field_item_rank">
                         排行榜
                     </div>
@@ -202,6 +206,60 @@ let MY_GAME_ANIMATION=function(stamp){
 }
 
 requestAnimationFrame(MY_GAME_ANIMATION);
+class Add_Blood extends MyGameObject{
+    constructor(playground, x, y, value){
+        super();
+        this.playground = playground;
+        this.ctx = this.playground.game_map.ctx;
+        this.x = x;
+        this.y = y;
+        this.value = value;
+        this.alive_time = 30;
+        this.eps = 0.01;
+    }
+
+    update(){
+        this.alive_time -= this.timedelta / 1000;
+        this.alive_time = Math.max(this.alive_time,0);
+        if(this.alive_time < this.eps)this.destroy();
+        this.render();
+    }
+    on_destroy(){
+        for(let i=0;i<this.playground.players.length;i++){
+            let player = this.playground.players[i];
+            if(player.character === "me"){
+                for(let j=0;j<player.add_blood_list.length;j++){
+                    if(player.add_blood_list[j].uuid === this.uuid){
+                        this.playground.players[i].add_blood_list.splice(j,1);
+                    }
+                }
+            }
+        }
+    } 
+    get_pos_x(x){
+        return (x - this.playground.cx)* this.playground.scale;
+    }
+
+    get_pos_y(y){
+        return (y - this.playground.cy) * this.playground.scale;
+    }
+    render(){
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.get_pos_x(this.x),this.get_pos_y(this.y - this.playground.height * 0.04 / this.playground.scale));
+        this.ctx.lineTo(this.get_pos_x(this.x),this.get_pos_y(this.y + this.playground.height * 0.04 / this.playground.scale));
+        this.ctx.lineWidth = 8;
+        this.ctx.strokeStyle = "green";
+        this.ctx.stroke();
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.get_pos_x(this.x - this.playground.height * 0.04 / this.playground.scale),this.get_pos_y(this.y));
+        this.ctx.lineTo(this.get_pos_x(this.x + this.playground.height * 0.04 / this.playground.scale),this.get_pos_y(this.y));
+        this.ctx.lineWidth = 8;
+        this.ctx.strokeStyle = "green";
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+}
 class Audio{
     constructor(playground){
         this.playground = playground;
@@ -429,9 +487,47 @@ class Mini_Map extends MyGameObject{
         }
         this.ctx.restore();
         this.render_focus_player_effect();
+        this.render_add_blood();
         if(this.playground.ring.radius > this.eps)this.render_ring();
         if(this.playground.ring.mini_radius > this.eps) this.render_small_ring();
     }
+    get_pos_x(x){                                                                                                                                           
+        return x * this.playground.scale;
+    }
+
+    get_pos_y(y){
+        return y * this.playground.scale;
+    }
+
+    render_add_blood(){
+        for(let i=0;i<this.playground.players.length;i++){
+            let player = this.playground.players[i];
+            if(player.character === "me")
+            {
+                for(let j=0;j<player.add_blood_list.length;j++){
+                    let add_blood = player.add_blood_list[j];
+                    let x = add_blood.x / this.playground.p / this.p;
+                    let y = add_blood.y / this.playground.p / this.p;
+                    let len = this.playground.height * 0.04 / this.playground.scale / this.playground.p /this.p;
+                    this.ctx.save();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.get_pos_x(x),this.get_pos_y(y-len));
+                    this.ctx.lineTo(this.get_pos_x(x),this.get_pos_y(y+len));
+                    this.ctx.lineWidth = 8;
+                    this.ctx.strokeStyle = "green";
+                    this.ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.get_pos_x(x-len),this.get_pos_y(y));
+                    this.ctx.lineTo(this.get_pos_x(x+len),this.get_pos_y(y));
+                    this.ctx.lineWidth = 8;
+                    this.ctx.strokeStyle = "green";
+                    this.ctx.stroke();
+                    this.ctx.restore();   
+                }
+            }
+        }
+    }
+
     render_focus_player_effect(){
         for(let i=0; i<this.playground.players.length; i++){
             let player = this.playground.players[i];
@@ -621,6 +717,8 @@ class Player extends MyGameObject{
             this.img.src = this.photo;
         }
         if(this.character === "me"){
+            this.tot_add_blood = 0;
+            this.add_blood_list = [];
             this.fireball_coldtime = 0.01;
             this.fireball_real_coldtime = 0.01;
             this.fireball_img = new Image();
@@ -891,7 +989,26 @@ class Player extends MyGameObject{
         this.vx = Math.cos(angle);
         this.vy = Math.sin(angle);
     }
+    update_add_blood(){
+        if(this.character === "me" && this.add_blood_list.length < 4 && Math.random()< 1.0/800){
+            let new_add_blood = new Add_Blood(this.playground, this.playground.virtual_width * Math.random(), this.playground.virtual_height * Math.random(), 10);
+            this.add_blood_list.push(new_add_blood);
+        }
+        if(this.character === "me"){
+            for(let j=0;j<this.add_blood_list.length;j++){
+                let li = this.add_blood_list[j];
+                console.log(li.x,li.y,this.x,this.y);
+                //console.log(this.get_dist(li.x,li.y,this.x,this.y));
+                if(this.get_dist(li.x,li.y,this.x,this.y) < this.radius){
+                    li.destroy();
+                    this.hp+=10;
+                    this.hp=Math.min(this.hp,100);
+                }
+            }
+        }
+    }
     update(){
+        this.update_add_blood();
         this.spent_time+=this.timedelta/1000;
         if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1.0/300){
             let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];
