@@ -324,7 +324,7 @@ class Player extends MyGameObject{
         }
     }
     update(){
-        this.update_add_blood();
+        if(this.playground.mode === "single mode")this.update_add_blood();
         this.spent_time+=this.timedelta/1000;
         if(this.character === "robot" && this.spent_time > 3 && Math.random() < 1.0/300){
             let player = this.playground.players[Math.floor(Math.random()*this.playground.players.length)];

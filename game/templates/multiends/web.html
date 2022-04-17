@@ -9,14 +9,14 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
     <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
         <script src="https://fastly.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{% static 'css/game-1.1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/game-1.2.css' %}">
     <link rel="icon" href="https://cdn.acwing.com/media/article/image/2021/12/17/1_be4c11ce5f-acapp.png">
 </head>
 
 <body style="margin: 0">
     <div id="my_game_12345678">
         <script type="module">
-            import {MyGame} from "{% static 'js/dist/game-1.1.js' %}";
+            import {MyGame} from "{% static 'js/dist/game-1.2.js' %}";
             $(document).ready(function(){
                 let my_game = new MyGame("my_game_12345678");
             });

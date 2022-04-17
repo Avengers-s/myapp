@@ -12,10 +12,6 @@ class MyGameMenu{
                         多人模式
                     </div>
                     <br>
-                    <div class="my_game_menu_field_item my_game_menu_field_item_alive_mod">
-                        生存模式
-                    </div>
-                    <br>
                     <div class="my_game_menu_field_item my_game_menu_field_item_rank">
                         排行榜
                     </div>
