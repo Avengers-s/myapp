@@ -30,7 +30,7 @@ class ScoreBoard extends MyGameObject{
         this.state = "win";
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            url: "https://wishball.dylolorz.cn/playground/update_score",
             type: "GET",
             data: {
                 username: outer.playground.root.settings.username,
@@ -51,7 +51,7 @@ class ScoreBoard extends MyGameObject{
         this.state = "lose";
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            url: "https://wishball.dylolorz.cn/playground/update_score",
             type: "GET",
             data: {
                 username: outer.playground.root.settings.username,

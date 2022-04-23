@@ -57,7 +57,7 @@ class MyGameRank{
         let l = page_num * (page - 1) + 1;
         let r = l + page_num - 1;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/rank/get_rank",
+            url: "https://wishball.dylolorz.cn/rank/get_rank",
             type: "GET",
             data:{
                 l: l,

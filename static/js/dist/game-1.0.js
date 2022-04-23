@@ -57,7 +57,7 @@ class MyGameRank{
         let l = page_num * (page - 1) + 1;
         let r = l + page_num - 1;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/rank/get_rank",
+            url: "https://wishball.dylolorz.cn/rank/get_rank",
             type: "GET",
             data:{
                 l: l,
@@ -205,7 +205,7 @@ requestAnimationFrame(MY_GAME_ANIMATION);
 class Audio{
     constructor(playground){
         this.playground = playground;
-        this.$bgm = $(`<audio src="https://app1281.acapp.acwing.com.cn/static/audio/bg.mp3" autoplay='autoplay' loop='loop'></audio>`);
+        this.$bgm = $(`<audio src="https://wishball.dylolorz.cn/static/audio/bg.mp3" autoplay='autoplay' loop='loop'></audio>`);
         this.playground.$playground.append(this.$bgm);
     }
 }
@@ -1256,7 +1256,7 @@ class ScoreBoard extends MyGameObject{
         this.state = "win";
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            url: "https://wishball.dylolorz.cn/playground/update_score",
             type: "GET",
             data: {
                 username: outer.playground.root.settings.username,
@@ -1277,7 +1277,7 @@ class ScoreBoard extends MyGameObject{
         this.state = "lose";
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/playground/update_score",
+            url: "https://wishball.dylolorz.cn/playground/update_score",
             type: "GET",
             data: {
                 username: outer.playground.root.settings.username,
@@ -1486,7 +1486,7 @@ class MultiPlayerSocket{
     constructor(playground){
         this.playground = playground;
         this.uuid = null;
-        this.ws = new WebSocket("wss://app1281.acapp.acwing.com.cn/wss/multiplayer/");
+        this.ws = new WebSocket("wss://wishball.dylolorz.cn/wss/multiplayer/");
         this.start();
     }
     start(){
@@ -1869,7 +1869,7 @@ class Settings {
         </div>
         <br>
         <div class="my_game_settings_acwing">
-            <img width="30" src="https://app1281.acapp.acwing.com.cn/static/image/settings/aclogo.jpg">
+            <img width="30" src="https://wishball.dylolorz.cn/static/image/settings/aclogo.jpg">
             <br>
             <div>
                 AcWing一键登录
@@ -1908,7 +1908,7 @@ class Settings {
         </div>
         <br>
         <div class="my_game_settings_acwing">
-            <img width="30" src="https://app1281.acapp.acwing.com.cn/static/image/settings/aclogo.jpg">
+            <img width="30" src="https://wishball.dylolorz.cn/static/image/settings/aclogo.jpg">
             <br>
             <div>
                 AcWing一键登录
@@ -1969,7 +1969,7 @@ class Settings {
     acwing_login(){
         
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            url: "https://wishball.dylolorz.cn/settings/acwing/web/apply_code/",
             type: "GET",
             success: function(resp){
                 if(resp.result==="success"){
@@ -1984,7 +1984,7 @@ class Settings {
             return false;
         }
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/logout",
+            url: "https://wishball.dylolorz.cn/settings/logout",
             type: "GET",
             data:{
             
@@ -2005,7 +2005,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/register",
+            url: "https://wishball.dylolorz.cn/settings/register",
             type: "GET",
             data: {
                 username: username,
@@ -2029,7 +2029,7 @@ class Settings {
         this.$login_error_message.empty();
         
         $.ajax({
-            url: "//app1281.acapp.acwing.com.cn/settings/login/",
+            url: "//wishball.dylolorz.cn/settings/login/",
             type: "GET",
             data: {
                 username: username,
@@ -2056,7 +2056,7 @@ class Settings {
     getinfo_acapp(){
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            url: "https://wishball.dylolorz.cn/settings/acwing/acapp/apply_code/",
             type: "GET",
             success:function(resp){
                 if(resp.result === "success"){
@@ -2081,7 +2081,7 @@ class Settings {
     getinfo_web(){
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/getinfo/",
+            url: "https://wishball.dylolorz.cn/settings/getinfo/",
             type: "GET",
             data: {
                 platform: outer.platform,

@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '81.69.41.2',
-    'app1281.acapp.acwing.com.cn',
+    'wishball.dylolorz.cn',
+    '127.0.0.1',
 ]
 
 CACHES = { 

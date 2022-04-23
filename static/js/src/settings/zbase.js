@@ -33,7 +33,7 @@ class Settings {
         </div>
         <br>
         <div class="my_game_settings_acwing">
-            <img width="30" src="https://app1281.acapp.acwing.com.cn/static/image/settings/aclogo.jpg">
+            <img width="30" src="https://wishball.dylolorz.cn/static/image/settings/aclogo.jpg">
             <br>
             <div>
                 AcWing一键登录
@@ -72,7 +72,7 @@ class Settings {
         </div>
         <br>
         <div class="my_game_settings_acwing">
-            <img width="30" src="https://app1281.acapp.acwing.com.cn/static/image/settings/aclogo.jpg">
+            <img width="30" src="https://wishball.dylolorz.cn/static/image/settings/aclogo.jpg">
             <br>
             <div>
                 AcWing一键登录
@@ -133,7 +133,7 @@ class Settings {
     acwing_login(){
         
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/acwing/web/apply_code/",
+            url: "https://wishball.dylolorz.cn/settings/acwing/web/apply_code/",
             type: "GET",
             success: function(resp){
                 if(resp.result==="success"){
@@ -148,7 +148,7 @@ class Settings {
             return false;
         }
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/logout",
+            url: "https://wishball.dylolorz.cn/settings/logout",
             type: "GET",
             data:{
             
@@ -169,7 +169,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/register",
+            url: "https://wishball.dylolorz.cn/settings/register",
             type: "GET",
             data: {
                 username: username,
@@ -193,7 +193,7 @@ class Settings {
         this.$login_error_message.empty();
         
         $.ajax({
-            url: "//app1281.acapp.acwing.com.cn/settings/login/",
+            url: "//wishball.dylolorz.cn/settings/login/",
             type: "GET",
             data: {
                 username: username,
@@ -220,7 +220,7 @@ class Settings {
     getinfo_acapp(){
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            url: "https://wishball.dylolorz.cn/settings/acwing/acapp/apply_code/",
             type: "GET",
             success:function(resp){
                 if(resp.result === "success"){
@@ -245,7 +245,7 @@ class Settings {
     getinfo_web(){
         let outer = this;
         $.ajax({
-            url: "https://app1281.acapp.acwing.com.cn/settings/getinfo/",
+            url: "https://wishball.dylolorz.cn/settings/getinfo/",
             type: "GET",
             data: {
                 platform: outer.platform,

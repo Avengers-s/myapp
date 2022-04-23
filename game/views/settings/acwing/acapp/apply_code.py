@@ -11,7 +11,7 @@ def get_state():
 def apply_code(request):
     apply_code_uri="https://www.acwing.com/third_party/api/oauth2/web/authorize/"
     appid = "1281"
-    redirect_uri = "https://app1281.acapp.acwing.com.cn/settings/acwing/acapp/receive_code/"
+    redirect_uri = "https://wishball.dylolorz.cn/settings/acwing/acapp/receive_code/"
     scope = "userinfo"
     state = get_state()
     cache.set(state,True,7200)
